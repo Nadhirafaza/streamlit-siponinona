@@ -145,7 +145,7 @@ else:
         ---
         ### 🚀 Cara Penggunaan Sistem:
         1. Upload file data pengelolaan sampah (.csv)
-        2. Tentukan jumlah cluster yang diinginkan
+        2. Masukan variabel, nilai awal centroid, dan tentukan jumlah cluster yang diinginkan
         3. Lihat hasil perhitungan dan visualisasi data dalam bentuk diagram
         
         💡 *Pastikan data Anda lengkap, terutama kolom numerik seperti: volume sampah, jarak ke TPA, jumlah desa, dan jumlah penduduk.*
@@ -391,6 +391,7 @@ else:
 
         else:
             st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
+
 
 
 
