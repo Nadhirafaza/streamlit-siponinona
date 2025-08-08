@@ -154,13 +154,18 @@ else:
         show_credit()
 
     elif menu == "📤 Upload File":
-        st.header("📤 Upload File CSV")
+        st.header("📤 Upload File Excel atau CSV")
     
-        uploaded_file = st.file_uploader("Pilih file CSV", type=["csv"])
+        uploaded_file = st.file_uploader("Pilih file Excel atau CSV", type=["xlsx", "csv"])
         
         if uploaded_file is not None:
             try:
-                df = pd.read_csv(uploaded_file)
+                # Baca file sesuai jenisnya
+                if uploaded_file.name.endswith('.csv'):
+                    df = pd.read_csv(uploaded_file)
+                else:
+                    df = pd.read_excel(uploaded_file, engine='openpyxl')
+
                 st.session_state.df = df
                 st.success("File berhasil diupload!")
                 
@@ -170,30 +175,29 @@ else:
                 numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
                 
                 if not numeric_cols:
-                    st.error("File CSV tidak mengandung kolom numerik.")
+                    st.error("File tidak mengandung kolom numerik.")
                 else:
                     # Normalisasi data menggunakan decimal scaling
                     df_normalized = df.copy()
-                    columns_to_normalize = [col for col in numeric_cols if col != "No"]  # Ganti "No" dengan nama kolom yang sesuai
+                    columns_to_normalize = [col for col in numeric_cols if col.lower() != "no"]  # Hindari kolom "No"
 
                     for col in columns_to_normalize:
                         max_value = df_normalized[col].max()
-                        if max_value != 0:  # Hindari pembagian dengan nol
+                        if max_value != 0:
                             df_normalized[col] = df_normalized[col] / max_value
 
                     st.session_state.df_normalized = df_normalized
                     st.session_state.selected_columns = numeric_cols
 
-
                     st.header("Data Setelah Normalisasi")
-                    show_data(st.session_state.df_normalized)
+                    show_data(df_normalized)
                     
                     st.header("Konfigurasi Clustering")
                     cols1, cols2 = st.columns(2)
                     
                     with cols1:
                         selected_columns = st.multiselect(
-                            "Pilih variabel untuk clustering (kolom **No** harap tidak dipilih)",
+                            "Pilih variabel untuk clustering",
                             numeric_cols,
                             default=numeric_cols[:2],
                             key="cols_selector"
@@ -208,13 +212,10 @@ else:
                         )
                         st.session_state.num_clusters = num_clusters
                     
-                    # Jumlah data
                     jumlah_data = len(df_normalized)
-
-                    # Hitung titik centroid otomatis berdasarkan rumus (n Data)/(Cluster_i + 1)
                     centroid_positions = []
                     for i in range(num_clusters):
-                        posisi = int(jumlah_data / (i + 2))  # Karena rumus: n / (cluster_id + 1)
+                        posisi = int(jumlah_data / (i + 2))
                         centroid_positions.append(posisi)
 
                     st.markdown("### Nilai Centroid Awal")
@@ -222,43 +223,42 @@ else:
                     st.info("Rumus Menentukan Nilai Centroid Awal: **(n Data) / (n Cluster + 1)**")
 
                     for i, posisi in enumerate(centroid_positions):
-                        st.markdown(f"- **C{i+1}** = {jumlah_data} / ({i+1}+1) = {jumlah_data // (i+2)} → Nilai centroid awal diambil dari baris data ke-**{posisi}** menjadi baris data ke-**{posisi-1}**")
+                        st.markdown(f"- **C{i+1}** = {jumlah_data} / ({i+1}+1) = {jumlah_data // (i+2)} → ambil baris ke-**{posisi}** (indeks {posisi-1})")
 
                     if selected_columns:
                         st.markdown("### Memilih Nilai Centroid Awal")
                         sample_df = df_normalized[selected_columns].copy()
-                        st.info("Mohon memilih baris data sebagai nilai centroid awal seperti keterangan diatas.")
-                        
+                        st.info("Pilih baris data untuk centroid awal sesuai saran posisi.")
+
                         centroid_cols = st.columns(num_clusters)
                         selected_data = []
-                        
+
                         for i in range(num_clusters):
                             with centroid_cols[i]:
-                                st.markdown(f"### Nilai Centroid Awal{i+1}")
-                                
+                                st.markdown(f"### Centroid Awal {i+1}")
                                 row_idx = st.selectbox(
-                                    f"Pilih baris untuk nilai centroid awal{i+1}",
+                                    f"Pilih baris untuk Centroid {i+1}",
                                     options=sample_df.index,
                                     format_func=lambda x: f"Baris {x}",
                                     key=f"centroid_{i}"
                                 )
-                                
                                 selected_values = df_normalized.loc[row_idx, selected_columns].values
                                 st.write(dict(zip(selected_columns, selected_values)))
                                 selected_data.append(selected_values)
-                        
+
                         st.session_state.selected_data = selected_data
                         st.success("Konfigurasi disimpan!")
 
                         show_credit()
 
             except Exception as e:
-                st.error(f"Error: {str(e)}")
+                st.error(f"Terjadi kesalahan saat membaca file: {str(e)}")
+
         elif st.session_state.df is not None:
             show_data(st.session_state.df)
             st.info("File sebelumnya masih tersedia. Upload file baru jika ingin mengganti.")
 
-            
+
     elif menu == "🧮 Hasil Perhitungan":
         st.header("🧮 Proses Clustering")
         
