@@ -23,10 +23,11 @@ st.set_page_config(
 def get_connection():
     try:
         connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="",
-            database="db_login"
+            host="sql.freesqldatabase.com",     # Ganti dengan host dari freesqldatabase.com
+            user="sql12794167",                 # Ganti dengan username kamu
+            password="yhcLMb3BWJ",           # Ganti dengan password kamu
+            database="sql12794167",             # Ganti dengan nama database kamu
+            port=3306
         )
         return connection
     except Error as e:
@@ -390,4 +391,5 @@ else:
 
         else:
             st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
+
 
