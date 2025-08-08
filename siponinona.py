@@ -23,7 +23,7 @@ st.set_page_config(
 def get_connection():
     try:
         connection = mysql.connector.connect(
-            host="sql.freesqldatabase.com",     # Ganti dengan host dari freesqldatabase.com
+            host="sql12.freesqldatabase.com",     # Ganti dengan host dari freesqldatabase.com
             user="sql12794167",                 # Ganti dengan username kamu
             password="yhcLMb3BWJ",           # Ganti dengan password kamu
             database="sql12794167",             # Ganti dengan nama database kamu
@@ -391,5 +391,6 @@ else:
 
         else:
             st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
+
 
 
