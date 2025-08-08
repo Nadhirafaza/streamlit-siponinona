@@ -193,7 +193,7 @@ else:
                     
                     with cols1:
                         selected_columns = st.multiselect(
-                            "Pilih variabel untuk clustering",
+                            "Pilih variabel untuk clustering (kolom **No** harap tidak dipilih)",
                             numeric_cols,
                             default=numeric_cols[:2],
                             key="cols_selector"
@@ -391,6 +391,7 @@ else:
 
         else:
             st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
+
 
 
 
