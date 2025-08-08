@@ -223,12 +223,12 @@ else:
                     st.info("Rumus Menentukan Nilai Centroid Awal: **(n Data) / (n Cluster + 1)**")
 
                     for i, posisi in enumerate(centroid_positions):
-                        st.markdown(f"- **C{i+1}** = {jumlah_data} / ({i+1}+1) = {jumlah_data // (i+2)} → ambil baris ke-**{posisi}** (indeks {posisi-1})")
+                        st.markdown(f"- **C{i+1}** = {jumlah_data} / ({i+1}+1) = {jumlah_data // (i+2)} → Nilai centroid awal diambil dari baris ke-**{posisi}** menjadi baris data ke-**{posisi-1}**")
 
                     if selected_columns:
                         st.markdown("### Memilih Nilai Centroid Awal")
                         sample_df = df_normalized[selected_columns].copy()
-                        st.info("Pilih baris data untuk centroid awal sesuai saran posisi.")
+                        st.info("Pilih baris data untuk nilai centroid awal sesuai saran posisi diatas.")
 
                         centroid_cols = st.columns(num_clusters)
                         selected_data = []
@@ -391,6 +391,7 @@ else:
 
         else:
             st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
+
 
 
 
