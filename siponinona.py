@@ -144,7 +144,7 @@ else:
         
         ---
         ### 🚀 Cara Penggunaan Sistem:
-        1. Upload file data pengelolaan sampah (.csv)
+        1. Upload file data pengelolaan sampah 
         2. Masukan variabel, nilai awal centroid, dan tentukan jumlah cluster yang diinginkan
         3. Lihat hasil perhitungan dan visualisasi data dalam bentuk diagram
         
@@ -154,7 +154,7 @@ else:
         show_credit()
 
     elif menu == "📤 Upload File":
-        st.header("📤 Upload File Excel atau CSV")
+        st.header("📤 Upload File")
     
         uploaded_file = st.file_uploader("Pilih file Excel atau CSV", type=["xlsx", "csv"])
         
@@ -391,6 +391,7 @@ else:
 
         else:
             st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
+
 
 
 
