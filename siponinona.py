@@ -215,8 +215,27 @@ else:
                 else:
                     df = pd.read_excel(uploaded_file, engine='openpyxl')
 
-                st.session_state.df = df
+                # Simpan ke session state agar tetap ada
+                st.session_state.df = df.copy()
+
                 st.success("File berhasil diupload!")
+
+                # === ✏️ Edit Data Langsung di Streamlit ===
+                st.subheader("✏️ Edit Data")
+                edited_df = st.data_editor(st.session_state.df, num_rows="dynamic")
+                st.session_state.df = edited_df  # Simpan hasil edit
+
+                # === 🗑️ Hapus Data ===
+                st.subheader("🗑️ Hapus Baris")
+                delete_idx = st.multiselect("Pilih indeks/baris yang ingin dihapus", edited_df.index)
+                if st.button("Hapus Baris"):
+                    st.session_state.df = edited_df.drop(delete_idx).reset_index(drop=True)
+                    st.success(f"{len(delete_idx)} baris berhasil dihapus.")
+
+                # Simpan ke database setelah edit/hapus
+                if st.button("💾 Simpan ke Database"):
+                    save_to_database(st.session_state.df)
+                    st.success("Data berhasil disimpan ke database!")
 
                 # Simpan ke database
                 save_to_database(df)
