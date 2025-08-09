@@ -208,74 +208,21 @@ else:
     
         uploaded_file = st.file_uploader("Pilih file Excel atau CSV", type=["xlsx", "csv"])
         
-        # Jika ada file baru diupload -> simpan ke session
         if uploaded_file is not None:
             try:
                 if uploaded_file.name.endswith('.csv'):
                     df = pd.read_csv(uploaded_file)
                 else:
                     df = pd.read_excel(uploaded_file, engine='openpyxl')
-                st.session_state.df = df.copy()
-                st.success("File berhasil diupload dan disimpan sementara di session.")
-            except Exception as e:
-                st.error(f"Terjadi kesalahan saat membaca file: {e}")
 
-        # Jika ada df di session, tampilkan editor
-        if st.session_state.df is not None:
-            df_work = st.session_state.df.copy()
+                st.session_state.df = df
+                st.success("File berhasil diupload!")
 
-            st.subheader("Data Awal (Edit / Tambah / Hapus)")
-            edited_df = st.data_editor(df_work, num_rows="dynamic", use_container_width=True)
+                # Simpan ke database
+                save_to_database(df)
 
-            # Tombol terapkan perubahan
-            cols_left, cols_right = st.columns([3,1])
-            with cols_right:
-                if st.button("🔄 Terapkan Perubahan (Update Session)"):
-                    edited_df = edited_df.reset_index(drop=True)
-                    st.session_state.df = edited_df.copy()
-                    st.success("Perubahan diterapkan ke session.")
-                    st.experimental_rerun()
-
-            # Download backup Excel dari edited_df (sebelum disimpan permanen)
-            st.markdown("**Backup / Download Data Saat Ini**")
-            buffer = BytesIO()
-            with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-                edited_df.to_excel(writer, index=False, sheet_name="Data")
-            buffer.seek(0)
-            st.download_button(
-                label="📥 Download Backup (Excel)",
-                data=buffer,
-                file_name="data_backup.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
-
-            # Tombol simpan ke DB (menggunakan data session agar konsisten)
-            if st.button("💾 Simpan Data ke Database (Gantikan seluruh isi tabel)"):
-                to_save = st.session_state.df.copy()
-                save_to_database(to_save)
-
-            # VALIDASI KOLom & NORMALISASI otomatis -> sinkron ke st.session_state.df_normalized
-            # Standard required columns (case-insensitive)
-            required_cols = [
-                "No", "Nama Kecamatan", "Volume Sampah Tidak Terlayani",
-                " Jarak ke TPA", " Jumlah Desa", "Jumlah Penduduk"
-            ]
-            lower_map = {c.lower(): c for c in st.session_state.df.columns}
-            missing = [c for c in required_cols if c.lower() not in lower_map]
-            if missing:
-                st.warning(f"Kolom wajib untuk analisis/normalisasi belum lengkap: {missing} (case-insensitive).")
-                st.session_state.df_normalized = None
-            else:
-                # rename ke standar
-                rename_map = {lower_map[c.lower()]: c for c in required_cols}
-                df_std = st.session_state.df.rename(columns=rename_map)
-                # Pastikan tipe numeric
-                # Convert columns that should be numeric
-                for col in ["Volume Sampah Tidak Terlayani", "Jarak ke TPA", "Jumlah Desa", "Jumlah Penduduk", "No"]:
-                    try:
-                        df_std[col] = pd.to_numeric(df_std[col], errors='coerce')
-                    except Exception:
-                        pass
+                st.header("Data Awal")
+                show_data(df)
 
                 numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
                 
@@ -355,6 +302,9 @@ else:
                         st.success("Konfigurasi disimpan!")
 
                         show_credit()
+
+            except Exception as e:
+                st.error(f"Terjadi kesalahan saat membaca file: {str(e)}")
 
         elif st.session_state.df is not None:
             show_data(st.session_state.df)
