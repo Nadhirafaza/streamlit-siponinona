@@ -258,7 +258,7 @@ else:
             # Standard required columns (case-insensitive)
             required_cols = [
                 "No", "Nama Kecamatan", "Volume Sampah Tidak Terlayani",
-                "Jarak ke TPA", "Jumlah Desa", "Jumlah Penduduk"
+                " Jarak ke TPA", " Jumlah Desa", " Jumlah Penduduk"
             ]
             lower_map = {c.lower(): c for c in st.session_state.df.columns}
             missing = [c for c in required_cols if c.lower() not in lower_map]
