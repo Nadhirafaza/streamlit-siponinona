@@ -215,33 +215,27 @@ else:
                 else:
                     df = pd.read_excel(uploaded_file, engine='openpyxl')
 
-                # Simpan ke session state agar tetap ada
-                st.session_state.df = df.copy()
-
+                st.session_state.df = df
                 st.success("File berhasil diupload!")
-
-                # === ✏️ Edit Data Langsung di Streamlit ===
-                st.subheader("✏️ Edit Data")
-                edited_df = st.data_editor(st.session_state.df, num_rows="dynamic")
-                st.session_state.df = edited_df  # Simpan hasil edit
-
-                # === 🗑️ Hapus Data ===
-                st.subheader("🗑️ Hapus Baris")
-                delete_idx = st.multiselect("Pilih indeks/baris yang ingin dihapus", edited_df.index)
-                if st.button("Hapus Baris"):
-                    st.session_state.df = edited_df.drop(delete_idx).reset_index(drop=True)
-                    st.success(f"{len(delete_idx)} baris berhasil dihapus.")
-
-                # Simpan ke database setelah edit/hapus
-                if st.button("💾 Simpan ke Database"):
-                    save_to_database(st.session_state.df)
-                    st.success("Data berhasil disimpan ke database!")
-
-                # Simpan ke database
                 save_to_database(df)
 
-                st.header("Data Awal")
-                show_data(df)
+                # --- FITUR EDIT & HAPUS DATA ---
+                st.subheader("✏️ Edit Data Awal")
+                edited_df = st.data_editor(df, num_rows="dynamic")
+
+                st.subheader("🗑 Hapus Data")
+                rows_to_delete = st.multiselect(
+                    "Pilih baris untuk dihapus",
+                    options=edited_df.index,
+                    format_func=lambda x: f"Baris {x+1}"
+                )
+                if rows_to_delete:
+                    edited_df = edited_df.drop(rows_to_delete).reset_index(drop=True)
+                    st.success(f"{len(rows_to_delete)} baris dihapus.")
+
+                if st.button("💾 Simpan Perubahan ke Database"):
+                    save_to_database(edited_df)
+                    st.session_state.df = edited_df
 
                 numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
                 
