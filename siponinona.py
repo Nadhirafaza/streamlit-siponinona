@@ -356,9 +356,6 @@ else:
 
                         show_credit()
 
-            except Exception as e:
-                st.error(f"Terjadi kesalahan saat membaca file: {str(e)}")
-
         elif st.session_state.df is not None:
             show_data(st.session_state.df)
             st.info("File sebelumnya masih tersedia. Upload file baru jika ingin mengganti.")
