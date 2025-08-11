@@ -388,7 +388,32 @@ else:
                 file_name="data_clustered.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
+           
+            # Definisikan mapping cluster sekali saja di awal visualisasi
+            cluster_label_map = {
+                '1': '1 TPS3R',
+                '2': '2 Bank Sampah',
+                '3': '3 Armada'
+            }
 
+            # Diagram Pie: Persentase tiap cluster
+            st.subheader("📈 Persentase Tiap Cluster")
+
+            cluster_counts = df_clustered['Cluster'].value_counts().sort_index()
+            fig_pie = px.pie(
+                names=cluster_counts.index.map(cluster_label_map),  # pakai nama deskriptif
+                values=cluster_counts.values,
+                title="Proporsi Data Tiap Cluster",
+                hole=0.4,  # Donut chart
+                color=cluster_counts.index.map(cluster_label_map),
+                color_discrete_map={
+                    '1 TPS3R': 'orange',
+                    '2 Bank Sampah': 'blue',
+                    '3 Armada': 'green'
+                }
+            )
+            fig_pie.update_traces(textposition='inside', textinfo='percent+label')
+            st.plotly_chart(fig_pie, use_container_width=True)
                 
             # PCA dan visualisasi interaktif
             pca = PCA(n_components=2)
