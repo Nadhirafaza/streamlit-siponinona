@@ -397,12 +397,11 @@ else:
             }
 
            # Diagram Pie: Persentase tiap cluster
-            st.subheader("📈 Persentase Tiap Cluster")
             cluster_counts = df_clustered['Cluster'].value_counts().sort_index()
             fig_pie = px.pie(
                 names=cluster_counts.index.map(cluster_label_map),
                 values=cluster_counts.values,
-                title="Proporsi Data Tiap Cluster",
+                title="Persentase Tiap Cluster",
                 hole=0.4,
                 color=cluster_counts.index.map(cluster_label_map),
                 color_discrete_map={
