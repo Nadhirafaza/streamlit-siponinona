@@ -444,6 +444,9 @@ else:
                 },
                 width=800,
                 height=600,
+                category_orders={  # ✅ Atur urutan legend
+                'Cluster': ['1 TPS3R', '2 Bank Sampah', '3 Armada']
+                },
                 color_discrete_map={
                     '1 TPS3R': 'orange',
                     '2 Bank Sampah': 'blue',
