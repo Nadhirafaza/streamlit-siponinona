@@ -424,9 +424,9 @@ else:
 
             # Langkah 4: Mapping label cluster ke label deskriptif
             cluster_label_map = {
-                1: '1 TPS3R',
-                2: '2 Bank Sampah',
-                3: '3 Armada'
+                '1': '1 TPS3R',
+                '2': '2 Bank Sampah',
+                '3': '3 Armada'
             }
             df_pca['Cluster'] = df_clustered['Cluster'].map(cluster_label_map)
 
