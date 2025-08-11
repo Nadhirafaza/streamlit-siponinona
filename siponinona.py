@@ -389,22 +389,21 @@ else:
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
            
-            # Definisikan mapping cluster sekali saja di awal visualisasi
+            # Mapping cluster ke label deskriptif
             cluster_label_map = {
-                '1': '1 TPS3R',
-                '2': '2 Bank Sampah',
-                '3': '3 Armada'
+                1: '1 TPS3R',
+                2: '2 Bank Sampah',
+                3: '3 Armada'
             }
 
-            # Diagram Pie: Persentase tiap cluster
+           # Diagram Pie: Persentase tiap cluster
             st.subheader("📈 Persentase Tiap Cluster")
-
             cluster_counts = df_clustered['Cluster'].value_counts().sort_index()
             fig_pie = px.pie(
-                names=cluster_counts.index.map(cluster_label_map),  # pakai nama deskriptif
+                names=cluster_counts.index.map(cluster_label_map),
                 values=cluster_counts.values,
                 title="Proporsi Data Tiap Cluster",
-                hole=0.4,  # Donut chart
+                hole=0.4,
                 color=cluster_counts.index.map(cluster_label_map),
                 color_discrete_map={
                     '1 TPS3R': 'orange',
