@@ -450,9 +450,9 @@ else:
                     '3 Armada': 'green'
                 },
                 symbol_map={
-                    '1 TPS3R': 'diamond',
-                    '2 Bank Sampah': 'circle',
-                    '3 Armada': 'square'
+                    '1 TPS3R': 'circle',
+                    '2 Bank Sampah': 'square',
+                    '3 Armada': 'diamond'
                 }
             )
             
