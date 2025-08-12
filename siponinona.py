@@ -7,8 +7,7 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from sklearn.metrics import silhouette_score, silhouette_samples
-import matplotlib.cm as cm
+from sklearn.metrics import silhouette_score
 import xlsxwriter
 from io import BytesIO
 import seaborn as sns
@@ -493,51 +492,32 @@ else:
         # Interpretasi hasil berdasarkan tabel kriteria
         if score >= 0.71:
             interpretasi = "Struktur Kuat"
-        elif score >= 0.51:
-            interpretasi = "Struktur Baik"
         elif score >= 0.26:
-            interpretasi = "Struktur Lemah"
+            interpretasi = "Struktur Baik"
         else:
             interpretasi = "Struktur Buruk"
 
-        st.info(f"Interpretasi: **{interpretasi}**")
+       # Silhouette Analysis Chart
+        if silhouette_score(X, labels) is not None:
+            st.subheader("📈 Silhouette Analysis")
+            silhouette_scores = []
+            k_range = range(2, 11)
+            for k in k_range:
+                if len(X) > k:
+                    km = KMeans(n_clusters=k, random_state=42)
+                    labels = km.fit_predict(X)
+                    score = silhouette_score(X, labels)
+                    silhouette_scores.append(score)
+                else:
+                    silhouette_scores.append(None)
 
-        # Hitung silhouette per sampel
-        sample_scores = silhouette_samples(X, labels)
-        df_clustered['Silhouette'] = sample_scores
-
-        # Tampilkan tabel nilai silhouette per kecamatan
-        st.subheader("Nilai Silhouette per Data")
-        st.dataframe(df_clustered[['Nama Kecamatan', 'Cluster', 'Silhouette']])
-
-        # === Visualisasi Scatter Silhouette seperti gambar contoh ===
-        pca = PCA(n_components=2)
-        X_pca = pca.fit_transform(X)
-
-        fig, ax = plt.subplots(figsize=(8, 6))
-        scatter = ax.scatter(
-            X_pca[:, 0],
-            X_pca[:, 1],
-            c=sample_scores,
-            cmap='RdYlGn',
-            edgecolor='k',
-            s=80
-        )
-
-        # Label cluster di tengah
-        for cluster_id in np.unique(labels):
-            idx = labels == cluster_id
-            center_x = X_pca[idx, 0].mean()
-            center_y = X_pca[idx, 1].mean()
-            ax.text(center_x, center_y, str(cluster_id), fontsize=12, weight='bold', color='black')
-
-        ax.set_title(f"Clusters and Silhouette Values\nAverage Silhouette Value = {score:.2f}")
-        ax.set_xlabel("PC1")
-        ax.set_ylabel("PC2")
-        plt.colorbar(scatter, ax=ax, label="Silhouette")
-        st.pyplot(fig)
+            fig2, ax2 = plt.subplots()
+            ax2.plot(k_range, silhouette_scores, marker='o', color='orange')
+            ax2.set_xlabel("Jumlah Cluster (k)")
+            ax2.set_ylabel("Silhouette Score")
+            ax2.set_title("Silhouette Analysis")
+            st.pyplot(fig2)
 
         show_credit()
-
     else:
-        st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan.")
+        st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
