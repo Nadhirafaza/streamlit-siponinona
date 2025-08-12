@@ -475,8 +475,8 @@ else:
             st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
 
 
-        elif menu == "📈 Evaluasi Hasil":
-            st.header("📈 Evaluasi Hasil Clustering - Silhouette Score")
+    elif menu == "📈 Evaluasi Hasil":
+        st.header("📈 Evaluasi Hasil Clustering - Silhouette Score")
 
         if st.session_state.df_clustered is not None:
             from sklearn.metrics import silhouette_score, silhouette_samples
