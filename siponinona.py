@@ -475,42 +475,73 @@ else:
             st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
 
 
-    # --- Tambahkan bagian Evaluasi Hasil ---
-    elif menu == "📈 Evaluasi Hasil":
-        st.header("📈 Evaluasi Hasil Clustering")
+        elif menu == "📈 Evaluasi Hasil":
+            st.header("📈 Evaluasi Hasil Clustering - Silhouette Score")
 
         if st.session_state.df_clustered is not None:
-            df_clustered = st.session_state.df_clustered
+            from sklearn.metrics import silhouette_score, silhouette_samples
+
+            df_clustered = st.session_state.df_clustered.copy()
             selected_columns = st.session_state.selected_columns
+
             X = df_clustered[selected_columns].values
+            labels = df_clustered['Cluster'].astype(int).values
 
-        # Hitung Silhouette Score (hanya jika cluster > 1)
-        silhouette_score_value = None
-        if st.session_state.num_clusters > 1 and len(X) > st.session_state.num_clusters:
-            from sklearn.metrics import silhouette_score
-            silhouette_score_value = silhouette_score(X, df_clustered['Cluster'].astype(int))
-            # Silhouette Analysis Chart
-        
-        if silhouette_score_value is not None:
-            st.subheader("📈 Silhouette Analysis")
-            silhouette_scores = []
-            k_range = range(2, 11)
-            for k in k_range:
-                if len(X) > k:
-                    km = KMeans(n_clusters=k, random_state=42)
-                    labels = km.fit_predict(X)
-                    score = silhouette_score(X, labels)
-                    silhouette_scores.append(score)
-                else:
-                    silhouette_scores.append(None)
+            # Hitung Silhouette Score keseluruhan
+            score = silhouette_score(X, labels)
+            st.subheader(f"Silhouette Score Keseluruhan: **{score:.4f}**")
 
-            fig2, ax2 = plt.subplots()
-            ax2.plot(k_range, silhouette_scores, marker='o', color='orange')
-            ax2.set_xlabel("Jumlah Cluster (k)")
-            ax2.set_ylabel("Silhouette Score")
-            ax2.set_title("Silhouette Analysis")
-            st.pyplot(fig2)
+            # Interpretasi hasil berdasarkan tabel kriteria
+            if score >= 0.71:
+                interpretasi = "Struktur Kuat"
+            elif score >= 0.51:
+                interpretasi = "Struktur Baik"
+            elif score >= 0.26:
+                interpretasi = "Struktur Lemah"
+            else:
+                interpretasi = "Struktur Buruk"
 
-        show_credit()
+            st.info(f"Interpretasi: **{interpretasi}**")
+
+            # Hitung silhouette per sampel
+            sample_scores = silhouette_samples(X, labels)
+            df_clustered['Silhouette'] = sample_scores
+
+            # Tampilkan tabel nilai silhouette per kecamatan
+            st.subheader("Nilai Silhouette per Data")
+            st.dataframe(df_clustered[['Nama Kecamatan', 'Cluster', 'Silhouette']])
+
+            # Visualisasi Silhouette Score per cluster
+            import matplotlib.cm as cm
+            fig, ax = plt.subplots(figsize=(10, 6))
+            y_lower = 10
+            for i in range(1, len(np.unique(labels)) + 1):
+                ith_cluster_silhouette_values = sample_scores[labels == i]
+                ith_cluster_silhouette_values.sort()
+                size_cluster_i = ith_cluster_silhouette_values.shape[0]
+                y_upper = y_lower + size_cluster_i
+                color = cm.nipy_spectral(float(i) / len(np.unique(labels)))
+                ax.fill_betweenx(
+                    np.arange(y_lower, y_upper),
+                    0, ith_cluster_silhouette_values,
+                    facecolor=color, edgecolor=color, alpha=0.7
+                )
+                ax.text(-0.05, y_lower + 0.5 * size_cluster_i, str(i))
+                y_lower = y_upper + 10  # jarak antar cluster
+
+            ax.set_title("Silhouette Plot per Cluster")
+            ax.set_xlabel("Nilai Silhouette")
+            ax.set_ylabel("Cluster")
+            ax.axvline(x=score, color="red", linestyle="--")
+            ax.set_yticks([])
+            ax.set_xticks(np.arange(-0.1, 1.1, 0.1))
+            st.pyplot(fig)
+
+            show_credit()
+
+        else:
+            st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan.")
+
+
     else:
-        st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
+        st.warning("⚠️ Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan.")
