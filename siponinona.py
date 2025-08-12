@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from sklearn.metrics import silhouette_score
 import xlsxwriter
 from io import BytesIO
 import seaborn as sns
@@ -173,10 +172,10 @@ else:
         st.markdown("---")
 
         menu = st.radio(
-        "Navigasi",
-        ["🏠 Beranda", "📤 Upload File", "🧮 Hasil Perhitungan", "📊 Diagram Hasil Cluster", "📈 Evaluasi Hasil"],
-        label_visibility="collapsed",
-        index=["🏠 Beranda", "📤 Upload File", "🧮 Hasil Perhitungan", "📊 Diagram Hasil Cluster", "📈 Evaluasi Hasil"].index(st.session_state.menu)
+            "Navigasi",
+            ["🏠 Beranda", "📤 Upload File", "🧮 Hasil Perhitungan", "📊 Diagram Hasil Cluster"],
+            label_visibility="collapsed",
+            index=["🏠 Beranda", "📤 Upload File", "🧮 Hasil Perhitungan", "📊 Diagram Hasil Cluster"].index(st.session_state.menu)
         )
 
         st.markdown("<br><br><br><br><br><br>", unsafe_allow_html=True)
@@ -474,50 +473,3 @@ else:
         else:
             st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
 
-
-    elif menu == "📈 Evaluasi Hasil":
-        st.header("📈 Evaluasi Hasil Clustering - Silhouette Score")
-
-        if st.session_state.df_clustered is not None:
-            df_clustered = st.session_state.df_clustered.copy()
-        selected_columns = st.session_state.selected_columns
-
-        X = df_clustered[selected_columns].values
-        labels = df_clustered['Cluster'].astype(int).values
-
-        # Hitung Silhouette Score keseluruhan
-        score = silhouette_score(X, labels)
-        st.subheader(f"Silhouette Score Keseluruhan: **{score:.4f}**")
-
-        # Interpretasi hasil berdasarkan tabel kriteria
-        if score >= 0.71:
-            interpretasi = "Struktur Kuat"
-        elif score >= 0.26:
-            interpretasi = "Struktur Baik"
-        else:
-            interpretasi = "Struktur Buruk"
-
-        st.info(f"Interpretasi: **{interpretasi}**")
-
-    if silhouette_score(X, labels) is not None:
-            st.subheader("📈 Silhouette Analysis")
-            silhouette_scores = []
-            k_range = range(2, 11)
-            for k in k_range:
-                if len(X) > k:
-                    km = KMeans(n_clusters=k, random_state=42)
-                    labels = km.fit_predict(X)
-                    score = silhouette_score(X, labels)
-                    silhouette_scores.append(score)
-                else:
-                    silhouette_scores.append(None)
-
-            fig2, ax2 = plt.subplots()
-            ax2.plot(k_range, silhouette_scores, marker='o', color='orange')
-            ax2.set_xlabel("Jumlah Cluster (k)")
-            ax2.set_ylabel("Silhouette Score")
-            ax2.set_title("Silhouette Analysis")
-            st.pyplot(fig2)
-
-    show_credit()
-               
