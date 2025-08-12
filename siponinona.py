@@ -497,8 +497,9 @@ else:
         else:
             interpretasi = "Struktur Buruk"
 
-       # Silhouette Analysis Chart
-        if silhouette_score(X, labels) is not None:
+        st.info(f"Interpretasi: **{interpretasi}**")
+
+    if silhouette_score(X, labels) is not None:
             st.subheader("📈 Silhouette Analysis")
             silhouette_scores = []
             k_range = range(2, 11)
@@ -518,6 +519,5 @@ else:
             ax2.set_title("Silhouette Analysis")
             st.pyplot(fig2)
 
-        show_credit()
-    else:
-        st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
+    show_credit()
+               
