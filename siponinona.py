@@ -11,6 +11,7 @@ import xlsxwriter
 from io import BytesIO
 import seaborn as sns
 import plotly.express as px
+from sklearn.metrics import silhouette_score
 
 # Konfigurasi halaman
 st.set_page_config(
@@ -172,10 +173,10 @@ else:
         st.markdown("---")
 
         menu = st.radio(
-            "Navigasi",
-            ["🏠 Beranda", "📤 Upload File", "🧮 Hasil Perhitungan", "📊 Diagram Hasil Cluster"],
-            label_visibility="collapsed",
-            index=["🏠 Beranda", "📤 Upload File", "🧮 Hasil Perhitungan", "📊 Diagram Hasil Cluster"].index(st.session_state.menu)
+        "Navigasi",
+        ["🏠 Beranda", "📤 Upload File", "🧮 Hasil Perhitungan", "📊 Diagram Hasil Cluster", "📈 Evaluasi Hasil"],
+        label_visibility="collapsed",
+        index=["🏠 Beranda", "📤 Upload File", "🧮 Hasil Perhitungan", "📊 Diagram Hasil Cluster", "📈 Evaluasi Hasil"].index(st.session_state.menu)
         )
 
         st.markdown("<br><br><br><br><br><br>", unsafe_allow_html=True)
@@ -473,3 +474,63 @@ else:
         else:
             st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
 
+
+    # --- Tambahkan bagian Evaluasi Hasil ---
+    elif menu == "📈 Evaluasi Hasil":
+        st.header("📈 Evaluasi Hasil Clustering")
+
+        if st.session_state.df_clustered is not None:
+            df_clustered = st.session_state.df_clustered
+            selected_columns = st.session_state.selected_columns
+            X = df_clustered[selected_columns].values
+
+            try:
+                # Hitung SSE (Sum of Squared Errors)
+                kmeans_eval = KMeans(
+                    n_clusters=st.session_state.num_clusters,
+                    init=np.array(st.session_state.selected_data),
+                    n_init=1
+                ).fit(X)
+                sse = kmeans_eval.inertia_
+
+                # Hitung Silhouette Score
+                silhouette_avg = silhouette_score(X, df_clustered['Cluster'].astype(int))
+
+                st.subheader("📊 Hasil Evaluasi")
+                st.write(f"**SSE (Sum of Squared Errors)**: `{sse:.4f}`")
+                st.write(f"**Silhouette Score**: `{silhouette_avg:.4f}` (Semakin mendekati 1, semakin baik)")
+
+                # Interpretasi sederhana
+                if silhouette_avg > 0.7:
+                    interpretasi = "🔹 **Sangat baik**: Cluster sangat terpisah dengan jelas."
+                elif silhouette_avg > 0.5:
+                    interpretasi = "🟢 **Baik**: Struktur cluster cukup jelas."
+                elif silhouette_avg > 0.25:
+                    interpretasi = "🟡 **Cukup**: Ada tumpang tindih antar cluster."
+                else:
+                    interpretasi = "🔴 **Kurang baik**: Cluster tidak terbentuk dengan baik."
+
+                st.markdown("### 📌 Interpretasi")
+                st.info(interpretasi)
+
+                # Grafik Silhouette Score per cluster
+                from sklearn.metrics import silhouette_samples
+                sample_scores = silhouette_samples(X, df_clustered['Cluster'].astype(int))
+                df_clustered['Silhouette Score'] = sample_scores
+
+                fig_silhouette = px.box(
+                    df_clustered,
+                    x='Cluster',
+                    y='Silhouette Score',
+                    title="Distribusi Silhouette Score per Cluster",
+                    color='Cluster'
+                )
+                st.plotly_chart(fig_silhouette, use_container_width=True)
+
+            except Exception as e:
+                st.error(f"❌ Gagal menghitung evaluasi: {e}")
+
+            show_credit()
+
+        else:
+            st.warning("⚠️ Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan.")
