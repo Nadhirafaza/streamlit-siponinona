@@ -248,14 +248,17 @@ else:
                     cols1, cols2 = st.columns(2)
                     
                     with cols1:
-                        selected_columns = st.multiselect(
-                            "Pilih variabel untuk clustering (khusus **No** harap tidak dipilih)",
-                            numeric_cols,
-                            default=numeric_cols[:2],
-                            key="cols_selector"
-                        )
-                        st.session_state.selected_columns = selected_columns
-                        
+                    # Filter agar kolom "No" tidak muncul di pilihan
+                        numeric_cols_no = [col for col in numeric_cols if col.lower() != "no"]
+
+                    selected_columns = st.multiselect(
+                        "Pilih variabel untuk clustering",
+                        numeric_cols_no,
+                        default=numeric_cols_no[:2] if len(numeric_cols_no) >= 2 else numeric_cols_no,
+                        key="cols_selector"
+                    )
+                    st.session_state.selected_columns = selected_columns
+
                     with cols2:
                         num_clusters = st.slider(
                             "Jumlah cluster (k)",
