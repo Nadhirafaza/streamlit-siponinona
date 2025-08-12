@@ -476,37 +476,63 @@ else:
             st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
 
     elif menu == "📈 Evaluasi Hasil":
-        st.header("📈 Evaluasi Hasil Clustering")
-    
-    if st.session_state.df_clustered is not None:
-        df_clustered = st.session_state.df_clustered
-        selected_columns = st.session_state.selected_columns
-        X = df_clustered[selected_columns].values
-        labels = df_clustered['Cluster'].astype(int).values
+     st.header("📈 Evaluasi Hasil Clustering")
 
-        from sklearn.metrics import silhouette_samples, silhouette_score
 
-        # Hitung silhouette
-        sil_samples = silhouette_samples(X, labels, metric="euclidean")
-        sil_avg = silhouette_score(X, labels, metric="euclidean")
+        # === 1. Baca file Excel ===
+    file_path = "data sillhouette.xlsx"  # pastikan file ada di folder yang sama
+    df = pd.read_excel(file_path, sheet_name="Sheet2", header=1)
 
-        # Tampilkan hasil
-        st.subheader("📊 Rata-rata Silhouette Score")
-        st.write(f"{sil_avg:.4f} (Semakin mendekati 1, semakin baik)")
+        # === 2. Kolom yang dipakai ===
+    numeric_cols = ["Vol Sampah", "Jarak", "JLH Desa", "JLH Pend"]
+    cluster_col = "Kelompok"
 
-        st.subheader("📋 Nilai Silhouette per Data")
-        df_sil = df_clustered.copy()
-        df_sil["Silhouette"] = sil_samples
-        st.dataframe(df_sil)
+        # === 3. Bersihkan data ===
+    df = df.dropna(subset=numeric_cols + [cluster_col])
+    for col in numeric_cols:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        # Visualisasi distribusi
-        import matplotlib.pyplot as plt
-        fig, ax = plt.subplots()
-        ax.hist(sil_samples, bins=20, color="skyblue", edgecolor="black")
-        ax.set_title("Distribusi Nilai Silhouette")
-        ax.set_xlabel("Silhouette Coefficient")
-        ax.set_ylabel("Frekuensi")
-        st.pyplot(fig)
+        # Konversi label cluster jadi angka
+    df["Cluster"] = df[cluster_col].astype(str).str.extract(r"(\d+)").astype(int)
 
-        show_credit()
+        # === 4. Siapkan data untuk perhitungan silhouette ===
+    X = df[numeric_cols].values
+    labels = df["Cluster"].values
+
+        # === 5. Hitung silhouette score ===
+    sil_samples = silhouette_samples(X, labels, metric="euclidean")
+    sil_avg = silhouette_score(X, labels, metric="euclidean")
+
+    df["Silhouette"] = sil_samples
+
+        # === 6. Tampilkan hasil di terminal ===
+    print("📊 Rata-rata Silhouette Score:", sil_avg)
+    print("\n📋 Contoh nilai silhouette per data:")
+    print(df[[cluster_col, "Silhouette"]].head())
+
+        # === 7. Simpan hasil ke Excel ===
+    output_file = "hasil_silhouette.xlsx"
+    df.to_excel(output_file, index=False)
+    print(f"\n✅ Hasil lengkap disimpan ke {output_file}")
+
+        # === 8. Visualisasi distribusi silhouette score ===
+    plt.figure(figsize=(8, 5))
+    plt.hist(sil_samples, bins=20, color="skyblue", edgecolor="black")
+    plt.axvline(sil_avg, color="red", linestyle="--", label=f"Rata-rata = {sil_avg:.4f}")
+    plt.title("Distribusi Nilai Silhouette")
+    plt.xlabel("Silhouette Coefficient")
+    plt.ylabel("Frekuensi")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+        # === 9. Boxplot per cluster ===
+    plt.figure(figsize=(8, 5))
+    df.boxplot(column="Silhouette", by="Cluster", grid=False)
+    plt.title("Distribusi Silhouette per Cluster")
+    plt.suptitle("")  # hapus judul otomatis pandas
+    plt.xlabel("Cluster")
+    plt.ylabel("Silhouette Coefficient")
+    plt.tight_layout()
+    plt.show()
 
