@@ -7,11 +7,12 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+from sklearn.metrics import silhouette_score, silhouette_samples
+import matplotlib.cm as cm
 import xlsxwriter
 from io import BytesIO
 import seaborn as sns
 import plotly.express as px
-from sklearn.metrics import silhouette_score
 
 # Konfigurasi halaman
 st.set_page_config(
@@ -479,69 +480,64 @@ else:
         st.header("📈 Evaluasi Hasil Clustering - Silhouette Score")
 
         if st.session_state.df_clustered is not None:
-            from sklearn.metrics import silhouette_score, silhouette_samples
-
             df_clustered = st.session_state.df_clustered.copy()
-            selected_columns = st.session_state.selected_columns
+        selected_columns = st.session_state.selected_columns
 
-            X = df_clustered[selected_columns].values
-            labels = df_clustered['Cluster'].astype(int).values
+        X = df_clustered[selected_columns].values
+        labels = df_clustered['Cluster'].astype(int).values
 
-            # Hitung Silhouette Score keseluruhan
-            score = silhouette_score(X, labels)
-            st.subheader(f"Silhouette Score Keseluruhan: **{score:.4f}**")
+        # Hitung Silhouette Score keseluruhan
+        score = silhouette_score(X, labels)
+        st.subheader(f"Silhouette Score Keseluruhan: **{score:.4f}**")
 
-            # Interpretasi hasil berdasarkan tabel kriteria
-            if score >= 0.71:
-                interpretasi = "Struktur Kuat"
-            elif score >= 0.51:
-                interpretasi = "Struktur Baik"
-            elif score >= 0.26:
-                interpretasi = "Struktur Lemah"
-            else:
-                interpretasi = "Struktur Buruk"
-
-            st.info(f"Interpretasi: **{interpretasi}**")
-
-            # Hitung silhouette per sampel
-            sample_scores = silhouette_samples(X, labels)
-            df_clustered['Silhouette'] = sample_scores
-
-            # Tampilkan tabel nilai silhouette per kecamatan
-            st.subheader("Nilai Silhouette per Data")
-            st.dataframe(df_clustered[['Nama Kecamatan', 'Cluster', 'Silhouette']])
-
-            # Visualisasi Silhouette Score per cluster
-            import matplotlib.cm as cm
-            fig, ax = plt.subplots(figsize=(10, 6))
-            y_lower = 10
-            for i in range(1, len(np.unique(labels)) + 1):
-                ith_cluster_silhouette_values = sample_scores[labels == i]
-                ith_cluster_silhouette_values.sort()
-                size_cluster_i = ith_cluster_silhouette_values.shape[0]
-                y_upper = y_lower + size_cluster_i
-                color = cm.nipy_spectral(float(i) / len(np.unique(labels)))
-                ax.fill_betweenx(
-                    np.arange(y_lower, y_upper),
-                    0, ith_cluster_silhouette_values,
-                    facecolor=color, edgecolor=color, alpha=0.7
-                )
-                ax.text(-0.05, y_lower + 0.5 * size_cluster_i, str(i))
-                y_lower = y_upper + 10  # jarak antar cluster
-
-            ax.set_title("Silhouette Plot per Cluster")
-            ax.set_xlabel("Nilai Silhouette")
-            ax.set_ylabel("Cluster")
-            ax.axvline(x=score, color="red", linestyle="--")
-            ax.set_yticks([])
-            ax.set_xticks(np.arange(-0.1, 1.1, 0.1))
-            st.pyplot(fig)
-
-            show_credit()
-
+        # Interpretasi hasil berdasarkan tabel kriteria
+        if score >= 0.71:
+            interpretasi = "Struktur Kuat"
+        elif score >= 0.51:
+            interpretasi = "Struktur Baik"
+        elif score >= 0.26:
+            interpretasi = "Struktur Lemah"
         else:
-            st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan.")
+            interpretasi = "Struktur Buruk"
 
+        st.info(f"Interpretasi: **{interpretasi}**")
+
+        # Hitung silhouette per sampel
+        sample_scores = silhouette_samples(X, labels)
+        df_clustered['Silhouette'] = sample_scores
+
+        # Tampilkan tabel nilai silhouette per kecamatan
+        st.subheader("Nilai Silhouette per Data")
+        st.dataframe(df_clustered[['Nama Kecamatan', 'Cluster', 'Silhouette']])
+
+        # === Visualisasi Scatter Silhouette seperti gambar contoh ===
+        pca = PCA(n_components=2)
+        X_pca = pca.fit_transform(X)
+
+        fig, ax = plt.subplots(figsize=(8, 6))
+        scatter = ax.scatter(
+            X_pca[:, 0],
+            X_pca[:, 1],
+            c=sample_scores,
+            cmap='RdYlGn',
+            edgecolor='k',
+            s=80
+        )
+
+        # Label cluster di tengah
+        for cluster_id in np.unique(labels):
+            idx = labels == cluster_id
+            center_x = X_pca[idx, 0].mean()
+            center_y = X_pca[idx, 1].mean()
+            ax.text(center_x, center_y, str(cluster_id), fontsize=12, weight='bold', color='black')
+
+        ax.set_title(f"Clusters and Silhouette Values\nAverage Silhouette Value = {score:.2f}")
+        ax.set_xlabel("PC1")
+        ax.set_ylabel("PC2")
+        plt.colorbar(scatter, ax=ax, label="Silhouette")
+        st.pyplot(fig)
+
+        show_credit()
 
     else:
-        st.warning("⚠️ Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan.")
+        st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan.")
