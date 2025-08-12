@@ -171,11 +171,12 @@ else:
             st.markdown("<div style='font-size:30px; font-weight:bold; margin-top:10px;'>SIPONINONA</div>", unsafe_allow_html=True)
         st.markdown("---")
 
+        # Sidebar: Navigasi
         menu = st.radio(
             "Navigasi",
-            ["🏠 Beranda", "📤 Upload File", "🧮 Hasil Perhitungan", "📊 Diagram Hasil Cluster"],
+            ["🏠 Beranda", "📤 Upload File", "🧮 Hasil Perhitungan", "📊 Diagram Hasil Cluster", "📈 Evaluasi Hasil"],
             label_visibility="collapsed",
-            index=["🏠 Beranda", "📤 Upload File", "🧮 Hasil Perhitungan", "📊 Diagram Hasil Cluster"].index(st.session_state.menu)
+            index=["🏠 Beranda", "📤 Upload File", "🧮 Hasil Perhitungan", "📊 Diagram Hasil Cluster", "📈 Evaluasi Hasil"].index(st.session_state.menu)
         )
 
         st.markdown("<br><br><br><br><br><br>", unsafe_allow_html=True)
@@ -470,6 +471,70 @@ else:
             
             show_credit()
 
+        else:
+            st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
+
+    elif menu == "📈 Evaluasi Hasil":
+        st.header("📈 Evaluasi Hasil Clustering")
+
+        if st.session_state.df_clustered is not None:
+            df_clustered = st.session_state.df_clustered
+            selected_columns = st.session_state.selected_columns
+            X = df_clustered[selected_columns].values
+
+            # Hitung SSE (Sum of Squared Errors / inertia_)
+            kmeans = KMeans(n_clusters=st.session_state.num_clusters, random_state=42)
+            kmeans.fit(X)
+            sse = kmeans.inertia_
+
+            # Hitung Silhouette Score (hanya jika cluster > 1)
+            silhouette_score_value = None
+            if st.session_state.num_clusters > 1 and len(X) > st.session_state.num_clusters:
+                from sklearn.metrics import silhouette_score
+                silhouette_score_value = silhouette_score(X, df_clustered['Cluster'].astype(int))
+
+            st.subheader("📊 Hasil Evaluasi")
+            st.write(f"**SSE (Sum of Squared Errors)**: {sse:.2f}")
+            if silhouette_score_value is not None:
+                st.write(f"**Silhouette Score**: {silhouette_score_value:.4f} (semakin mendekati 1, semakin baik)")
+
+            # Elbow Method Chart
+            st.subheader("📉 Elbow Method")
+            sse_values = []
+            k_range = range(2, 11)
+            for k in k_range:
+                km = KMeans(n_clusters=k, random_state=42)
+                km.fit(X)
+                sse_values.append(km.inertia_)
+
+            fig, ax = plt.subplots()
+            ax.plot(k_range, sse_values, marker='o')
+            ax.set_xlabel("Jumlah Cluster (k)")
+            ax.set_ylabel("SSE")
+            ax.set_title("Elbow Method untuk Menentukan k Optimal")
+            st.pyplot(fig)
+
+            # Silhouette Analysis Chart
+            if silhouette_score_value is not None:
+                st.subheader("📈 Silhouette Analysis")
+                silhouette_scores = []
+                for k in k_range:
+                    if len(X) > k:
+                        km = KMeans(n_clusters=k, random_state=42)
+                        labels = km.fit_predict(X)
+                        score = silhouette_score(X, labels)
+                        silhouette_scores.append(score)
+                    else:
+                        silhouette_scores.append(None)
+
+                fig2, ax2 = plt.subplots()
+                ax2.plot(k_range, silhouette_scores, marker='o', color='orange')
+                ax2.set_xlabel("Jumlah Cluster (k)")
+                ax2.set_ylabel("Silhouette Score")
+                ax2.set_title("Silhouette Analysis")
+                st.pyplot(fig2)
+
+            show_credit()
         else:
             st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
 
