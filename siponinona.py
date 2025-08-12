@@ -484,53 +484,33 @@ else:
             selected_columns = st.session_state.selected_columns
             X = df_clustered[selected_columns].values
 
-            try:
-                # Hitung SSE (Sum of Squared Errors)
-                kmeans_eval = KMeans(
-                    n_clusters=st.session_state.num_clusters,
-                    init=np.array(st.session_state.selected_data),
-                    n_init=1
-                ).fit(X)
-                sse = kmeans_eval.inertia_
-
-                # Hitung Silhouette Score
-                silhouette_avg = silhouette_score(X, df_clustered['Cluster'].astype(int))
-
-                st.subheader("📊 Hasil Evaluasi")
-                st.write(f"**SSE (Sum of Squared Errors)**: `{sse:.4f}`")
-                st.write(f"**Silhouette Score**: `{silhouette_avg:.4f}` (Semakin mendekati 1, semakin baik)")
-
-                # Interpretasi sederhana
-                if silhouette_avg > 0.7:
-                    interpretasi = "🔹 **Sangat baik**: Cluster sangat terpisah dengan jelas."
-                elif silhouette_avg > 0.5:
-                    interpretasi = "🟢 **Baik**: Struktur cluster cukup jelas."
-                elif silhouette_avg > 0.25:
-                    interpretasi = "🟡 **Cukup**: Ada tumpang tindih antar cluster."
+        # Hitung Silhouette Score (hanya jika cluster > 1)
+        silhouette_score_value = None
+        if st.session_state.num_clusters > 1 and len(X) > st.session_state.num_clusters:
+            from sklearn.metrics import silhouette_score
+            silhouette_score_value = silhouette_score(X, df_clustered['Cluster'].astype(int))
+            # Silhouette Analysis Chart
+        
+        if silhouette_score_value is not None:
+            st.subheader("📈 Silhouette Analysis")
+            silhouette_scores = []
+            k_range = range(2, 11)
+            for k in k_range:
+                if len(X) > k:
+                    km = KMeans(n_clusters=k, random_state=42)
+                    labels = km.fit_predict(X)
+                    score = silhouette_score(X, labels)
+                    silhouette_scores.append(score)
                 else:
-                    interpretasi = "🔴 **Kurang baik**: Cluster tidak terbentuk dengan baik."
+                    silhouette_scores.append(None)
 
-                st.markdown("### 📌 Interpretasi")
-                st.info(interpretasi)
+            fig2, ax2 = plt.subplots()
+            ax2.plot(k_range, silhouette_scores, marker='o', color='orange')
+            ax2.set_xlabel("Jumlah Cluster (k)")
+            ax2.set_ylabel("Silhouette Score")
+            ax2.set_title("Silhouette Analysis")
+            st.pyplot(fig2)
 
-                # Grafik Silhouette Score per cluster
-                from sklearn.metrics import silhouette_samples
-                sample_scores = silhouette_samples(X, df_clustered['Cluster'].astype(int))
-                df_clustered['Silhouette Score'] = sample_scores
-
-                fig_silhouette = px.box(
-                    df_clustered,
-                    x='Cluster',
-                    y='Silhouette Score',
-                    title="Distribusi Silhouette Score per Cluster",
-                    color='Cluster'
-                )
-                st.plotly_chart(fig_silhouette, use_container_width=True)
-
-            except Exception as e:
-                st.error(f"❌ Gagal menghitung evaluasi: {e}")
-
-            show_credit()
-
-        else:
-            st.warning("⚠️ Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan.")
+        show_credit()
+    else:
+        st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
