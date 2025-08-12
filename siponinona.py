@@ -477,7 +477,6 @@ else:
 
     elif menu == "📈 Evaluasi Hasil":
         st.header("📈 Evaluasi Hasil Clustering")
-
     
     if st.session_state.df_clustered is not None:
         df_clustered = st.session_state.df_clustered
@@ -510,6 +509,4 @@ else:
         st.pyplot(fig)
 
         show_credit()
-    else:
-        st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
 
