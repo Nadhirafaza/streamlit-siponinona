@@ -471,7 +471,7 @@ else:
             show_credit()
 
         else:
-            st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
+            st.warning("⚠️ Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
 
     elif menu == "📈 Evaluasi Hasil":
         st.header("Silhouette Score")
@@ -511,3 +511,4 @@ else:
 
         else:
             st.warning("⚠️ Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan.")
+
