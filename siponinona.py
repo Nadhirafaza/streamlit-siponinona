@@ -529,12 +529,12 @@ else:
 
             if silhouette_avg < 0.50:
                 st.info("""
-                ⚠️ **Catatan:** 
-                        ###
-                         1. Hasil clustering ini tetap berguna sebagai panduan awal untuk pengelompokan wilayah.
-                         2. Informasi ini dapat membantu alokasi fasilitas pengelolaan sampah agar lebih tepat sasaran.
-                         3. Hasil clustering dapat dikombinasikan dengan data lapangan dan evaluasi rutin agar pengelolaan sampah menjadi lebih efektif.
-                """)
+                    ⚠️ **Catatan:**  
+
+                    1. Hasil clustering ini tetap berguna sebagai panduan awal untuk pengelompokan wilayah.
+                    2. Informasi ini dapat membantu alokasi fasilitas pengelolaan sampah agar lebih tepat sasaran.
+                    3. Hasil clustering dapat dikombinasikan dengan data lapangan dan evaluasi rutin agar pengelolaan sampah menjadi lebih efektif.
+                    """)
 
             show_credit()
 
