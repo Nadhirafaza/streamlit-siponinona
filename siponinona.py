@@ -477,38 +477,68 @@ else:
         st.header("Silhouette Score")
 
         if st.session_state.df_clustered is not None:
-            from sklearn.metrics import silhouette_score, silhouette_samples
+            from scipy.spatial.distance import cdist
 
-            df_clustered = st.session_state.df_clustered.copy()
-            selected_columns = st.session_state.selected_columns
+        df_clustered = st.session_state.df_clustered.copy()
+        selected_columns = st.session_state.selected_columns
+        X = df_clustered[selected_columns].values
+        labels = df_clustered['Cluster'].astype(int).values
 
-            X = df_clustered[selected_columns].values
-            labels = df_clustered['Cluster'].astype(int).values
+        # Hitung jarak antar titik
+        dist_matrix = cdist(X, X, metric='euclidean')
 
-            # Hitung silhouette score keseluruhan
-            score = silhouette_score(X, labels)
-            st.success(f"Silhouette Score keseluruhan: **{score:.3f}**")
+        silhouette_values = []
+        for i in range(len(X)):
+            same_cluster = labels == labels[i]
+            other_clusters = labels != labels[i]
 
-            # Opsional: Hitung silhouette untuk beberapa nilai k
-            st.subheader("Analisis Silhouette untuk berbagai k")
-            k_range = range(2, 11)
-            silhouette_scores = []
+            # a(i): rata-rata jarak ke semua titik dalam klaster yang sama (kecuali diri sendiri)
+            a_i = np.mean(dist_matrix[i][same_cluster & (np.arange(len(X)) != i)])
 
-            for k in k_range:
-                kmeans_temp = KMeans(n_clusters=k, random_state=42)
-                labels_temp = kmeans_temp.fit_predict(X)
-                silhouette_scores.append(silhouette_score(X, labels_temp))
+            # b(i): cari rata-rata jarak ke setiap klaster lain, lalu ambil yang minimum
+            b_i = np.inf
+            for cluster_id in np.unique(labels):
+                if cluster_id != labels[i]:
+                    cluster_points = labels == cluster_id
+                    avg_dist = np.mean(dist_matrix[i][cluster_points])
+                    b_i = min(b_i, avg_dist)
 
-            # Tampilkan grafik
-            fig2, ax2 = plt.subplots()
-            ax2.plot(k_range, silhouette_scores, marker='o', color='orange')
-            ax2.set_xlabel("Jumlah Cluster (k)")
-            ax2.set_ylabel("Silhouette Score")
-            ax2.set_title("Silhouette Analysis")
-            st.pyplot(fig2)
+            # s(i): rumus silhouette coefficient manual
+            s_i = (b_i - a_i) / max(a_i, b_i)
+            silhouette_values.append(s_i)
 
-            show_credit()
+        # Nilai Silhouette Coefficient keseluruhan
+        silhouette_avg = np.mean(silhouette_values)
+        st.success(f"Nilai Silhouette Coefficient (Manual): **{silhouette_avg:.3f}**")
 
+        # Interpretasi berdasarkan tabel
+        if silhouette_avg >= 0.71:
+            kategori = "Struktur Kuat"
+        elif silhouette_avg >= 0.51:
+            kategori = "Struktur Baik"
+        elif silhouette_avg >= 0.26:
+            kategori = "Struktur Lemah"
         else:
-            st.warning("⚠️ Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan.")
+            kategori = "Struktur Buruk"
+        st.info(f"Interpretasi: **{kategori}**")
 
+        # Tampilkan nilai per data
+        st.subheader("Nilai S(i) per Data")
+        df_sil = df_clustered.copy()
+        df_sil['S(i)'] = silhouette_values
+        st.dataframe(df_sil)
+
+        # Plot distribusi S(i)
+        fig, ax = plt.subplots()
+        ax.hist(silhouette_values, bins=10, color='skyblue', edgecolor='black')
+        ax.axvline(silhouette_avg, color='red', linestyle='--', label=f"Rata-rata = {silhouette_avg:.3f}")
+        ax.set_xlabel("Nilai S(i)")
+        ax.set_ylabel("Frekuensi")
+        ax.set_title("Distribusi Silhouette Coefficient per Data")
+        ax.legend()
+        st.pyplot(fig)
+
+        show_credit()
+
+    else:
+        st.warning("⚠️ Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan.")
