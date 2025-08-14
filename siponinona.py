@@ -478,57 +478,56 @@ else:
         st.header("Silhouette Score")
 
         if st.session_state.df_clustered is not None:
-            from scipy.spatial.distance import cdist
 
-        df_clustered = st.session_state.df_clustered.copy()
-        selected_columns = st.session_state.selected_columns
-        X = df_clustered[selected_columns].values
-        labels = df_clustered['Cluster'].astype(int).values
+            df_clustered = st.session_state.df_clustered.copy()
+            selected_columns = st.session_state.selected_columns
+            X = df_clustered[selected_columns].values
+            labels = df_clustered['Cluster'].astype(int).values
 
-        # Hitung matriks jarak Euclidean antar semua titik
-        dist_matrix = cdist(X, X, metric='euclidean')
+            # Hitung matriks jarak Euclidean antar semua titik
+            dist_matrix = cdist(X, X, metric='euclidean')
 
-        silhouette_values = []
-        for i in range(len(X)):
-            same_cluster_idx = np.where(labels == labels[i])[0]
-            same_cluster_idx = same_cluster_idx[same_cluster_idx != i]  # buang dirinya sendiri
-            if len(same_cluster_idx) > 0:
-                a_i = np.mean(dist_matrix[i, same_cluster_idx])
-            else:
-                a_i = 0
+            silhouette_values = []
+            for i in range(len(X)):
+                same_cluster_idx = np.where(labels == labels[i])[0]
+                same_cluster_idx = same_cluster_idx[same_cluster_idx != i]  # buang dirinya sendiri
+                if len(same_cluster_idx) > 0:
+                    a_i = np.mean(dist_matrix[i, same_cluster_idx])
+                else:
+                    a_i = 0
 
-            b_i_list = []
-            for cluster_id in np.unique(labels):
-                if cluster_id != labels[i]:
-                    other_cluster_idx = np.where(labels == cluster_id)[0]
-                    b_i_list.append(np.mean(dist_matrix[i, other_cluster_idx]))
-            b_i = min(b_i_list)
+                b_i_list = []
+                for cluster_id in np.unique(labels):
+                    if cluster_id != labels[i]:
+                        other_cluster_idx = np.where(labels == cluster_id)[0]
+                        b_i_list.append(np.mean(dist_matrix[i, other_cluster_idx]))
+                b_i = min(b_i_list)
 
-            if max(a_i, b_i) > 0:
-                s_i = (b_i - a_i) / max(a_i, b_i)
-            else:
-                s_i = 0
-            silhouette_values.append(s_i)
+                if max(a_i, b_i) > 0:
+                    s_i = (b_i - a_i) / max(a_i, b_i)
+                else:
+                    s_i = 0
+                silhouette_values.append(s_i)
 
-        # Nilai rata-rata silhouette
-        silhouette_avg = np.mean(silhouette_values)
-        st.success(f"Nilai Silhouette Coefficient: **{silhouette_avg:.4f}**")
+            # Nilai rata-rata silhouette
+            silhouette_avg = np.mean(silhouette_values)
+            st.success(f"Nilai Silhouette Coefficient: **{silhouette_avg:.4f}**")
 
-        # Simpan ke dataframe
-        df_clustered['S(i)'] = silhouette_values
-        st.dataframe(df_clustered)
+            # Simpan ke dataframe
+            df_clustered['S(i)'] = silhouette_values
+            st.dataframe(df_clustered)
 
-        # === Plot grafik silhouette per titik ===
-        fig, ax = plt.subplots()
-        ax.bar(range(len(silhouette_values)), silhouette_values, color='orange')
-        ax.axhline(y=silhouette_avg, color='red', linestyle='--', label=f'Rata-rata: {silhouette_avg:.4f}')
-        ax.set_xlabel("Index Data")
-        ax.set_ylabel("S(i)")
-        ax.set_title("Nilai Silhouette per Titik Data")
-        ax.legend()
-        st.pyplot(fig)
+            # === Plot grafik silhouette per titik ===
+            fig, ax = plt.subplots()
+            ax.bar(range(len(silhouette_values)), silhouette_values, color='orange')
+            ax.axhline(y=silhouette_avg, color='red', linestyle='--', label=f'Rata-rata: {silhouette_avg:.4f}')
+            ax.set_xlabel("Index Data")
+            ax.set_ylabel("S(i)")
+            ax.set_title("Nilai Silhouette per Titik Data")
+            ax.legend()
+            st.pyplot(fig)
 
-        show_credit()
+            show_credit()
 
-    else:
-        st.warning("⚠️ Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan.")
+        else:
+            st.warning("⚠️ Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan.")
