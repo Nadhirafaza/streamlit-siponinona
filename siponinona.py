@@ -172,10 +172,10 @@ else:
         st.markdown("---")
 
         menu = st.radio(
-            "Navigasi",
-            ["🏠 Beranda", "📤 Upload File", "🧮 Hasil Perhitungan", "📊 Diagram Hasil Cluster"],
-            label_visibility="collapsed",
-            index=["🏠 Beranda", "📤 Upload File", "🧮 Hasil Perhitungan", "📊 Diagram Hasil Cluster"].index(st.session_state.menu)
+        "Navigasi",
+        ["🏠 Beranda", "📤 Upload File", "🧮 Hasil Perhitungan", "📊 Diagram Hasil Cluster", "📈 Evaluasi Hasil"],
+        label_visibility="collapsed",
+        index=["🏠 Beranda", "📤 Upload File", "🧮 Hasil Perhitungan", "📊 Diagram Hasil Cluster", "📈 Evaluasi Hasil"].index(st.session_state.menu)
         )
 
         st.markdown("<br><br><br><br><br><br>", unsafe_allow_html=True)
@@ -473,3 +473,41 @@ else:
         else:
             st.warning("Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan")
 
+    elif menu == "📈 Evaluasi Hasil":
+        st.header("Silhouette Score")
+
+        if st.session_state.df_clustered is not None:
+            from sklearn.metrics import silhouette_score, silhouette_samples
+
+            df_clustered = st.session_state.df_clustered.copy()
+            selected_columns = st.session_state.selected_columns
+
+            X = df_clustered[selected_columns].values
+            labels = df_clustered['Cluster'].astype(int).values
+
+            # Hitung silhouette score keseluruhan
+            score = silhouette_score(X, labels)
+            st.success(f"Silhouette Score keseluruhan: **{score:.3f}**")
+
+            # Opsional: Hitung silhouette untuk beberapa nilai k
+            st.subheader("Analisis Silhouette untuk berbagai k")
+            k_range = range(2, 11)
+            silhouette_scores = []
+
+            for k in k_range:
+                kmeans_temp = KMeans(n_clusters=k, random_state=42)
+                labels_temp = kmeans_temp.fit_predict(X)
+                silhouette_scores.append(silhouette_score(X, labels_temp))
+
+            # Tampilkan grafik
+            fig2, ax2 = plt.subplots()
+            ax2.plot(k_range, silhouette_scores, marker='o', color='orange')
+            ax2.set_xlabel("Jumlah Cluster (k)")
+            ax2.set_ylabel("Silhouette Score")
+            ax2.set_title("Silhouette Analysis")
+            st.pyplot(fig2)
+
+            show_credit()
+
+        else:
+            st.warning("⚠️ Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan.")
