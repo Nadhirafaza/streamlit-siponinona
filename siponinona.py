@@ -11,6 +11,7 @@ import xlsxwriter
 from io import BytesIO
 import seaborn as sns
 import plotly.express as px
+from scipy.spatial.distance import cdist
 
 # Konfigurasi halaman
 st.set_page_config(
@@ -484,57 +485,46 @@ else:
         X = df_clustered[selected_columns].values
         labels = df_clustered['Cluster'].astype(int).values
 
-        # Hitung jarak antar titik
+        # Hitung matriks jarak Euclidean antar semua titik
         dist_matrix = cdist(X, X, metric='euclidean')
 
         silhouette_values = []
         for i in range(len(X)):
-            same_cluster = labels == labels[i]
-            other_clusters = labels != labels[i]
+            same_cluster_idx = np.where(labels == labels[i])[0]
+            same_cluster_idx = same_cluster_idx[same_cluster_idx != i]  # buang dirinya sendiri
+            if len(same_cluster_idx) > 0:
+                a_i = np.mean(dist_matrix[i, same_cluster_idx])
+            else:
+                a_i = 0
 
-            # a(i): rata-rata jarak ke semua titik dalam klaster yang sama (kecuali diri sendiri)
-            a_i = np.mean(dist_matrix[i][same_cluster & (np.arange(len(X)) != i)])
-
-            # b(i): cari rata-rata jarak ke setiap klaster lain, lalu ambil yang minimum
-            b_i = np.inf
+            b_i_list = []
             for cluster_id in np.unique(labels):
                 if cluster_id != labels[i]:
-                    cluster_points = labels == cluster_id
-                    avg_dist = np.mean(dist_matrix[i][cluster_points])
-                    b_i = min(b_i, avg_dist)
+                    other_cluster_idx = np.where(labels == cluster_id)[0]
+                    b_i_list.append(np.mean(dist_matrix[i, other_cluster_idx]))
+            b_i = min(b_i_list)
 
-            # s(i): rumus silhouette coefficient manual
-            s_i = (b_i - a_i) / max(a_i, b_i)
+            if max(a_i, b_i) > 0:
+                s_i = (b_i - a_i) / max(a_i, b_i)
+            else:
+                s_i = 0
             silhouette_values.append(s_i)
 
-        # Nilai Silhouette Coefficient keseluruhan
+        # Nilai rata-rata silhouette
         silhouette_avg = np.mean(silhouette_values)
-        st.success(f"Nilai Silhouette Coefficient (Manual): **{silhouette_avg:.3f}**")
+        st.success(f"Nilai Silhouette Coefficient: **{silhouette_avg:.4f}**")
 
-        # Interpretasi berdasarkan tabel
-        if silhouette_avg >= 0.71:
-            kategori = "Struktur Kuat"
-        elif silhouette_avg >= 0.51:
-            kategori = "Struktur Baik"
-        elif silhouette_avg >= 0.26:
-            kategori = "Struktur Lemah"
-        else:
-            kategori = "Struktur Buruk"
-        st.info(f"Interpretasi: **{kategori}**")
+        # Simpan ke dataframe
+        df_clustered['S(i)'] = silhouette_values
+        st.dataframe(df_clustered)
 
-        # Tampilkan nilai per data
-        st.subheader("Nilai S(i) per Data")
-        df_sil = df_clustered.copy()
-        df_sil['S(i)'] = silhouette_values
-        st.dataframe(df_sil)
-
-        # Plot distribusi S(i)
+        # === Plot grafik silhouette per titik ===
         fig, ax = plt.subplots()
-        ax.hist(silhouette_values, bins=10, color='skyblue', edgecolor='black')
-        ax.axvline(silhouette_avg, color='red', linestyle='--', label=f"Rata-rata = {silhouette_avg:.3f}")
-        ax.set_xlabel("Nilai S(i)")
-        ax.set_ylabel("Frekuensi")
-        ax.set_title("Distribusi Silhouette Coefficient per Data")
+        ax.bar(range(len(silhouette_values)), silhouette_values, color='orange')
+        ax.axhline(y=silhouette_avg, color='red', linestyle='--', label=f'Rata-rata: {silhouette_avg:.4f}')
+        ax.set_xlabel("Index Data")
+        ax.set_ylabel("S(i)")
+        ax.set_title("Nilai Silhouette per Titik Data")
         ax.legend()
         st.pyplot(fig)
 
