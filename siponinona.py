@@ -190,15 +190,15 @@ else:
         st.write("""
         **SIPONINONA (Sistem Informasi Pemetaan Kondisi Komponen Pengelolaan Sampah)** adalah platform digital berbasis data yang dirancang untuk:
         
-        🔍 **Menganalisis kondisi komponen pengelolaan sampah** di tiap kecamatan di Kabupaten Bogor  
-        📊 **Mengelompokkan wilayah berdasarkan kondisi komponen pengelolaan sampah** menggunakan metode *K-Means*  
-        🧠 **Membantu perencanaan strategis dan alokasi sumber daya** oleh pemerintah daerah dan stakeholder terkait
+        🔍 **Menganalisis kondisi komponen pengelolaan sampah** di tiap kecamatan di Kabupaten Bogor.  
+        📊 **Mengelompokkan wilayah berdasarkan kondisi komponen pengelolaan sampah** menggunakan metode *K-Means*.  
+        🧠 **Membantu perencanaan strategis dan alokasi sumber daya** oleh pemerintah daerah dan stakeholder terkait.
         
         ---
         ### 🚀 Cara Penggunaan Sistem:
-        1. Upload file data pengelolaan sampah 
-        2. Masukan variabel, nilai awal centroid, dan tentukan jumlah cluster yang diinginkan
-        3. Lihat hasil perhitungan dan visualisasi data dalam bentuk diagram
+        1. Upload file data pengelolaan sampah.
+        2. Masukan variabel, nilai awal centroid, dan tentukan jumlah cluster yang diinginkan.
+        3. Lihat hasil perhitungan dan visualisasi data dalam bentuk diagram.
         
         💡 *Pastikan data Anda lengkap, terutama kolom numerik seperti: volume sampah, jarak ke TPA, jumlah desa, dan jumlah penduduk.*
         """)
@@ -530,9 +530,10 @@ else:
             if silhouette_avg < 0.50:
                 st.info("""
                 ⚠️ **Catatan:** 
-                         1. **Hasil clustering ini tetap berguna sebagai panduan awal untuk pengelompokan wilayah** 
-                         2. **Informasi ini dapat membantu alokasi fasilitas pengelolaan sampah agar lebih tepat sasaran**
-                         3. **Hasil clustering dapat dikombinasikan dengan data lapangan dan evaluasi rutin agar pengelolaan sampah menjadi lebih efektif**.
+                        ###
+                         1. Hasil clustering ini tetap berguna sebagai panduan awal untuk pengelompokan wilayah.
+                         2. Informasi ini dapat membantu alokasi fasilitas pengelolaan sampah agar lebih tepat sasaran.
+                         3. Hasil clustering dapat dikombinasikan dengan data lapangan dan evaluasi rutin agar pengelolaan sampah menjadi lebih efektif.
                 """)
 
             show_credit()
