@@ -476,7 +476,7 @@ else:
                 - **Cluster 2 (2 Bank Sampah)**: Wilayah ini disarankan untuk alokasi fasilitas Bank Sampah.  
                 - **Cluster 3 (3 Armada)**: Wilayah ini disarankan untuk alokasi fasilitas Armada.
                       
-            💡 Catatan: Penentuan cluster ini berdasarkan hasil clustering K-Means dan sebaiknya dikombinasikan dengan evaluasi lapangan.
+                💡 Catatan: Penentuan cluster ini berdasarkan hasil clustering K-Means dan sebaiknya dikombinasikan dengan evaluasi lapangan.
                 """)
             show_credit()
 
