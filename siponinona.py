@@ -531,7 +531,7 @@ else:
             ax.bar(range(len(silhouette_values)), silhouette_values, color='orange')
             ax.axhline(y=silhouette_avg, color='red', linestyle='--', label=f'Rata-rata: {silhouette_avg:.4f}')
             ax.set_xlabel("Index Data")
-            ax.set_ylabel("S(i)")
+            ax.set_ylabel("Silhouette Coefficient")
             ax.set_title("Nilai Silhouette per Titik Data")
             ax.legend()
             st.pyplot(fig)
