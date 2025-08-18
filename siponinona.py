@@ -12,7 +12,6 @@ from io import BytesIO
 import seaborn as sns
 import plotly.express as px
 from scipy.spatial.distance import cdist
-from sklearn.metrics import silhouette_score
 
 # Konfigurasi halaman
 st.set_page_config(
@@ -487,37 +486,45 @@ else:
     elif menu == "📈 Evaluasi Hasil":
         st.header("Silhouette Score")
 
-        if len(set(labels)) > 1:
-                # Rata-rata
-                silhouette_avg = silhouette_score(X, labels)
-                st.subheader("Silhouette Coefficient (Average)")
-                penjelasan = "Cluster terbentuk dengan sangat baik dan jelas terpisah."
-                if silhouette_avg > 0.70:
-                    struktur_avg = "Strong Structure"
-                elif silhouette_avg > 0.50:
-                    struktur_avg = "Medium Structure"
-                    penjelasan = "Cluster cukup baik, namun ada sedikit tumpang tindih."
-                elif silhouette_avg > 0.25:
-                    struktur_avg = "Weak Structure"
-                    penjelasan = "Cluster lemah, banyak data yang saling tumpang tindih."
-                else:
-                    struktur_avg = "No Structure"
-                    penjelasan = "Tidak ada struktur cluster yang jelas."
-                
-                st.info(
-                    f"**Kategori Struktur Cluster:** {struktur_avg}  \n"
-                    f"**Nilai Silhouette Coefficient:** {silhouette_avg:.3f} - {penjelasan}"
-                )
-                # Per data
-                sample_silhouette_values = silhouette_samples(X, labels)
-                df_silhouette = pd.DataFrame({
-                    "Data": [f"Data {i+1}" for i in range(len(sample_silhouette_values))],
-                    "Silhouette Coefficient": np.round(sample_silhouette_values, 3),
-                    "Cluster": labels
-                })
+        if st.session_state.df_clustered is not None:
 
-                with st.expander("Tabel Silhouette Coefficient per Data", expanded=True):
-                    st.dataframe(df_silhouette)
+            df_clustered = st.session_state.df_clustered.copy()
+            selected_columns = st.session_state.selected_columns
+            X = df_clustered[selected_columns].values
+            labels = df_clustered['Cluster'].astype(int).values
+
+            # Hitung matriks jarak Euclidean antar semua titik
+            dist_matrix = cdist(X, X, metric='euclidean')
+
+            silhouette_values = []
+            for i in range(len(X)):
+                same_cluster_idx = np.where(labels == labels[i])[0]
+                same_cluster_idx = same_cluster_idx[same_cluster_idx != i]  # buang dirinya sendiri
+                if len(same_cluster_idx) > 0:
+                    a_i = np.mean(dist_matrix[i, same_cluster_idx])
+                else:
+                    a_i = 0
+
+                b_i_list = []
+                for cluster_id in np.unique(labels):
+                    if cluster_id != labels[i]:
+                        other_cluster_idx = np.where(labels == cluster_id)[0]
+                        b_i_list.append(np.mean(dist_matrix[i, other_cluster_idx]))
+                b_i = min(b_i_list)
+
+                if max(a_i, b_i) > 0:
+                    s_i = (b_i - a_i) / max(a_i, b_i)
+                else:
+                    s_i = 0
+                silhouette_values.append(s_i)
+
+            # Nilai rata-rata silhouette
+            silhouette_avg = np.mean(silhouette_values)
+            st.success(f"Nilai Silhouette Coefficient: **{silhouette_avg:.4f}**")
+
+            # Simpan ke dataframe
+            df_clustered['S(i)'] = silhouette_values
+            st.dataframe(df_clustered)
 
             # === Plot grafik silhouette per titik ===
             fig, ax = plt.subplots()
