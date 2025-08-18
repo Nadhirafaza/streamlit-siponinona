@@ -523,7 +523,7 @@ else:
             st.success(f"Nilai Silhouette Coefficient: **{silhouette_avg:.4f}**")
 
             # Simpan ke dataframe
-            df_clustered['Silhouette Coefficient'] = silhouette_values
+            df_clustered['S(i)'] = silhouette_values
             st.dataframe(df_clustered)
 
             # === Plot grafik silhouette per titik ===
