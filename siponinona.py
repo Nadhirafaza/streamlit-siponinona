@@ -259,7 +259,7 @@ else:
                     Sementara itu, jumlah cluster ditentukan **k = 3** karena penelitian ini diarahkan pada **3 jenis rekomendasi alokasi fasilitas pengelolaan sampah**:
                     1. **TPS3R** (Tempat pengolahan sampah Reduce-Reuse-Recycle).  
                     2. **Bank Sampah** (Fasilitas daur ulang sampah).  
-                    3. **Armada** (Penambahan kendaraan angkut sampah menuju TPA).  
+                    3. **Armada** (Kendaraan angkut sampah menuju TPA).  
 
                     Dengan konfigurasi ini, setiap wilayah dapat dikelompokkan sesuai kebutuhan utama pengelolaan sampah, sehingga hasil analisis lebih **praktis, sistematis, dan dapat langsung menjadi dasar kebijakan**.
                     """)
@@ -409,6 +409,58 @@ else:
                 file_name="data_clustered.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
+
+            # === Data Koordinat Kecamatan Kabupaten Bogor ===
+            koordinat_data = {
+                "Kecamatan": [
+                    "Babakan Madang","Bojonggede","Caringin","Ciampea","Ciawi","Cibinong","Cibungbulang","Cigombong","Cigudeg",
+                    "Cijeruk","Cileungsi","Ciomas","Cisarua","Ciseeng","Citeureup","Dramaga","Gunung Putri","Gunung Sindur",
+                    "Jasinga","Jonggol","Kemang","Klapanunggal","Leuwiliang","Leuwisadeng","Megamendung","Nanggung",
+                    "Pamijahan","Parung","Parung Panjang","Ranca Bungur","Rumpin","Sukajaya","Sukamakmur","Sukaraja",
+                    "Tajurhalang","Tamansari","Tanjungsari","Tenjo","Tenjolaya"
+                ],
+                "Latitude": [
+                    -6.5641,-6.5006,-6.6931,-6.5548,-6.6715,-6.4814,-6.5405,-6.7306,-6.5151,
+                    -6.6951,-6.3943,-6.5862,-6.6696,-6.4898,-6.4889,-6.5587,-6.4078,-6.3923,
+                    -6.4833,-6.4873,-6.4995,-6.4202,-6.5419,-6.5423,-6.6762,-6.5625,
+                    -6.6362,-6.4489,-6.3650,-6.6021,-6.4792,-6.6435,-6.5322,
+                    -6.5430,-6.5030,-6.6134,-6.5061,-6.6550
+                ],
+                "Longitude": [
+                    106.8906,106.8000,106.8503,106.7096,106.8792,106.8531,106.6664,106.8536,106.4877,
+                    106.8214,106.9592,106.7741,106.9487,106.7042,106.9267,106.7269,106.9594,106.7411,
+                    106.4167,107.0339,106.7839,106.9336,106.5892,106.6114,106.9242,106.5331,
+                    106.6831,106.7172,106.5031,106.6764,106.6286,106.5356,106.8967,
+                    106.8500,106.7667,106.7167,106.3700,106.6833
+                ]
+            }
+
+            df_koordinat = pd.DataFrame(koordinat_data)
+
+            # === Contoh Data Hasil Clustering ===
+            # Misal hasil clustering kamu sudah ada dataframe bernama df_cluster
+            df_cluster = pd.DataFrame({
+                "Kecamatan": ["Babakan Madang","Bojonggede","Ciampea","Cibinong","Cigombong"],
+                "Cluster": [0, 1, 2, 0, 1]
+            })
+
+            # === Gabungkan Data Cluster dengan Koordinat ===
+            df_gabung = pd.merge(df_cluster, df_koordinat, on="Kecamatan", how="left")
+
+            # === Plot ke Peta ===
+            fig = px.scatter_mapbox(
+                df_gabung,
+                lat="Latitude",
+                lon="Longitude",
+                color="Cluster",
+                hover_name="Kecamatan",
+                zoom=9,
+                height=600,
+                mapbox_style="carto-positron"
+            )
+
+            st.title("Peta Hasil Clustering per Kecamatan")
+            st.plotly_chart(fig, use_container_width=True)
            
             # Mapping cluster ke label deskriptif
             cluster_label_map = {
