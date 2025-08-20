@@ -513,7 +513,7 @@ else:
             )
 
             fig_map.update_layout(
-                mapbox_style="open-street-map",
+                mapbox_style="carto-positron",
                 margin={"r":0,"t":0,"l":0,"b":0},
                 legend_title_text='Cluster'
             )
