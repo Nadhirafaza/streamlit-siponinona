@@ -499,14 +499,6 @@ else:
                 '3': '3 Armada'
             }
             df_map['Cluster_Label'] = df_map['Cluster'].map(cluster_label_map)
-
-            category_orders = {'Cluster_Label': ['1 TPS3R', '2 Bank Sampah', '3 Armada']}
-
-            symbol_map = {
-            '1 TPS3R':'circle',
-            '2 Bank Sampah':'square',
-            '3 Armada':'diamond'
-        }
             
             fig_map = px.scatter_mapbox(
                 df_map,
@@ -517,9 +509,19 @@ else:
                 color="Cluster_Label",
                 zoom=10,
                 height=600,
-                category_orders=category_orders,
-                color_discrete_map={'1 TPS3R':'orange','2 Bank Sampah':'blue','3 Armada':'green'},
-                symbol_map=symbol_map
+                category_orders={  # ✅ Atur urutan legend
+                'Cluster': ['1 TPS3R', '2 Bank Sampah', '3 Armada']
+                },
+                color_discrete_map={
+                    '1 TPS3R': 'orange',
+                    '2 Bank Sampah': 'blue',
+                    '3 Armada': 'green'
+                },
+                symbol_map={
+                    '1 TPS3R': 'circle',
+                    '2 Bank Sampah': 'square',
+                    '3 Armada': 'diamond'
+                }
             )
 
             fig_map.update_layout(
