@@ -246,7 +246,6 @@ else:
                     show_data(df_normalized)
                     
                     st.header("Konfigurasi Clustering")
-                    cols1, cols2 = st.columns(2)
                     st.markdown("""
                     ### ℹ️ Penjelasan
                     Pada tahap **Konfigurasi Clustering**, pengguna diminta untuk memilih variabel yang relevan agar hasil pengelompokan sesuai dengan kondisi lapangan.  
@@ -267,6 +266,7 @@ else:
                     Dengan konfigurasi ini, setiap wilayah dapat dikelompokkan sesuai kebutuhan utama pengelolaan sampahnya, sehingga hasil analisis lebih **praktis, sistematis, dan dapat langsung menjadi dasar kebijakan**.
                     """)
                     
+                    cols1, cols2 = st.columns(2)
                     with cols1:
                     # Filter agar kolom "No" tidak muncul di pilihan
                         numeric_cols_no = [col for col in numeric_cols if col.lower() != "no"]
