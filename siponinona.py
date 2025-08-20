@@ -490,6 +490,16 @@ else:
             coords_df = pd.read_excel("data_koordinat.xlsx")  # pastikan ada kolom Nama Kecamatan, Latitude, Longitude
             df_map = pd.merge(df_clustered, coords_df, on='Nama Kecamatan', how='left')
 
+            df_map['Cluster'] = df_map['Cluster'].astype(str)
+
+            # Buat kolom Cluster_Label berdasarkan mapping
+            cluster_label_map = {
+                '1': '1 TPS3R',
+                '2': '2 Bank Sampah',
+                '3': '3 Armada'
+            }
+            df_map['Cluster_Label'] = df_map['Cluster'].map(cluster_label_map)
+            
             fig_map = px.scatter_mapbox(
                 df_map,
                 lat="Latitude",
