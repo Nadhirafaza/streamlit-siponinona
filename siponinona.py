@@ -486,25 +486,28 @@ else:
             # Tampilkan plot interaktif
             st.plotly_chart(fig, use_container_width=True)
 
-            if "Latitude" in df_clustered.columns and "Longitude" in df_clustered.columns:
-             st.subheader("🗺️ Peta Hasil Cluster")
+            # Baca file koordinat dari folder proyek
+            coords_df = pd.read_excel("data_koordinat.xlsx")  # pastikan ada kolom Nama Kecamatan, Latitude, Longitude
+            df_map = pd.merge(df_clustered, coords_df, on='Nama Kecamatan', how='left')
 
             fig_map = px.scatter_mapbox(
-                df_clustered,
+                df_map,
                 lat="Latitude",
                 lon="Longitude",
-                color="Cluster_Label",
                 hover_name="Nama Kecamatan",
-                zoom=9,
-                size_max=15,
-                mapbox_style="carto-positron",
-                title="Peta Sebaran Cluster per Kecamatan",
-                color_discrete_map={
-                    "1 TPS3R": "orange",
-                    "2 Bank Sampah": "blue",
-                    "3 Armada": "green"
-                }
+                hover_data=["Cluster_Label", "Volume Sampah Tidak Terlayani"],
+                color="Cluster_Label",
+                zoom=10,
+                height=600,
+                color_discrete_map={'1 TPS3R':'orange','2 Bank Sampah':'blue','3 Armada':'green'}
             )
+
+            fig_map.update_layout(
+                mapbox_style="open-street-map",
+                margin={"r":0,"t":0,"l":0,"b":0},
+                legend_title_text='Cluster'
+            )
+
             st.plotly_chart(fig_map, use_container_width=True)
 
             # Catatan interpretasi tiap cluster
