@@ -509,16 +509,7 @@ else:
                 color="Cluster_Label",
                 zoom=10,
                 height=600,
-                color_discrete_map={
-                    '1 TPS3R': 'orange',
-                    '2 Bank Sampah': 'blue',
-                    '3 Armada': 'green'
-                },
-                symbol_map={
-                    '1 TPS3R': 'circle',
-                    '2 Bank Sampah': 'square',
-                    '3 Armada': 'diamond'
-                }
+                color_discrete_map={'1 TPS3R':'orange','2 Bank Sampah':'blue','3 Armada':'green'}
             )
 
             fig_map.update_layout(
