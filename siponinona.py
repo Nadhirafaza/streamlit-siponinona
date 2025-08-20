@@ -487,7 +487,7 @@ else:
             st.plotly_chart(fig, use_container_width=True)
 
             if "Latitude" in df_clustered.columns and "Longitude" in df_clustered.columns:
-            st.subheader("🗺️ Peta Hasil Cluster")
+             st.subheader("🗺️ Peta Hasil Cluster")
 
             fig_map = px.scatter_mapbox(
                 df_clustered,
