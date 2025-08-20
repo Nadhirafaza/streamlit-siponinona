@@ -413,46 +413,44 @@ else:
             # === Data Koordinat Kecamatan Kabupaten Bogor ===
             koordinat_data = {
                 "Kecamatan": [
-                  "Babakan Madang","Bojonggede","Caringin","Ciampea","Ciawi","Cibinong","Cibungbulang","Cigombong","Cigudeg",
-                    "Cijeruk","Cileungsi","Ciomas","Cisarua","Ciseeng","Citeureup","Dramaga","Gunung Putri","Gunung Sindur",
-                    "Jasinga","Jonggol","Kemang","Klapanunggal","Leuwiliang","Leuwisadeng","Megamendung","Nanggung",
-                    "Pamijahan","Parung","Parung Panjang","Ranca Bungur","Rumpin","Sukajaya","Sukamakmur","Sukaraja",
-                    "Tajurhalang","Tamansari","Tanjungsari","Tenjo","Tenjolaya","Cariu"
-                ],
+                "Cibinong","Babakan Madang","Sukaraja","Bojong Gede","Tajur Halang",
+                "Citereup","Gunung Putri","Jonggol","Klapanunggal","Cileungsi",
+                "Cariu","Sukamakmur","Tanjungsari","Ciawi","Megamendung",
+                "Cisarua","Caringin","Cijeruk","Cigombong","Ciampea",
+                "Ciomas","Dramaga","Tamansari","Tenjolaya","Parung",
+                "Kemang","Rancabungur","Ciseeng","Gunung Sindur","Leuwiliang",
+                "Leuwisadeng","Cibungbulang","Pamijahan","Nanggung","Jasinga",
+                "Tenjo","Parung Panjang","Rumpin","Cigudeg","Sukajaya"
+                ], 
+
                 "Latitude": [
-                    -6.5641,-6.5006,-6.6931,-6.5548,-6.6715,-6.4814,-6.5405,-6.7306,-6.5151,
-                    -6.6951,-6.3943,-6.5862,-6.6696,-6.4898,-6.4889,-6.5587,-6.4078,-6.3923,
-                    -6.4833,-6.4873,-6.4995,-6.4202,-6.5419,-6.5423,-6.6762,-6.5625,
-                    -6.6362,-6.4489,-6.3650,-6.6021,-6.4792,-6.6435,-6.5322,
-                    -6.5430,-6.5030,-6.6134,-6.5061,-6.6550,-6.4422
+                    -6.497641,-6.5938837,-6.610811,-6.493378,-6.4728474,
+                    -6.482500,-6.428865,-6.50818065,-6.48336005,-6.405975,
+                    -6.5351046,-6.468662,-6.5963235,-6.712398,-6.69341,
+                    -6.679303,-6.7128814,-6.6814912,-6.7311989,-6.575281,
+                    -6.5894574,-6.5842593,-6.6399254,-6.6572023, -6.41000,
+                    -6.4972977,-6.5230828,-6.45906965,-6.397872,-6.5739203,
+                    -6.5665356,-6.6417,-6.6950942,-6.6678299,-6.4660737,
+                    -6.3624864,-6.3487209,-6.4434031,-6.4924748,-6.6191165
                 ],
                 "Longitude": [
-                    106.8906,106.8000,106.8503,106.7096,106.8792,106.8531,106.6664,106.8536,106.4877,
-                    106.8214,106.9592,106.7741,106.9487,106.7042,106.9267,106.7269,106.9594,106.7411,
-                    106.4167,107.0339,106.7839,106.9336,106.5892,106.6114,106.9242,106.5331,
-                    106.6831,106.7172,106.5031,106.6764,106.6286,106.5356,106.8967,
-                    106.8500,106.7667,106.7167,106.3700,106.6833,107.0450
+                   106.828224,106.9004472,106.848862,106.794952,106.7684194,
+                   106.873993,106.924057,107.028261659058,106.952567560024,106.994896,
+                   107.1071616,106.960361,107.1248214,106.894547,106.89102,
+                   106.939835,106.838158,106.7970599,106.797352,106.693980,
+                   106.7666223,106.731048,-6.5517758,106.7057733,106.73000,
+                   106.7416578,106.7175669,106.679297856509,106.691322,106.6326192,
+                   106.5924237,106.6756,106.6527099,106.5466221,106.4536971,
+                   106.4523662,106.5653055,106.6309995,106.5584071,106.4641459
             ]
             }
 
             df_koordinat = pd.DataFrame(koordinat_data)
 
-            # === Contoh Data Hasil Clustering ===
-            # Misal hasil clustering kamu sudah ada dataframe bernama df_cluster
-            df_cluster = pd.DataFrame({
-                "Kecamatan": ["Babakan Madang","Bojonggede","Ciampea","Cibinong","Cigombong"],
-                "Cluster": [0, 1, 2, 0, 1]
-            })
-
-            # === Gabungkan Data Cluster dengan Koordinat ===
-            df_gabung = pd.merge(df_cluster, df_koordinat, on="Kecamatan", how="left")
-
             # === Plot ke Peta ===
             fig = px.scatter_mapbox(
-                df_gabung,
                 lat="Latitude",
                 lon="Longitude",
-                color="Cluster",
                 hover_name="Kecamatan",
                 zoom=9,
                 height=600,
