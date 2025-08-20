@@ -507,12 +507,9 @@ else:
                 hover_name="Nama Kecamatan",
                 hover_data=["Cluster_Label", "Volume Sampah Tidak Terlayani"],
                 color="Cluster_Label",
-                symbol="Cluster_Label",  # simbol berbeda per cluster
                 zoom=10,
                 height=600,
-                category_orders={'Cluster_Label': ['1 TPS3R','2 Bank Sampah','3 Armada']},
-                color_discrete_map={'1 TPS3R':'orange','2 Bank Sampah':'blue','3 Armada':'green'},
-                symbol_map={'1 TPS3R':'circle','2 Bank Sampah':'square','3 Armada':'diamond'}  # simbol
+                color_discrete_map={'1 TPS3R':'orange','2 Bank Sampah':'blue','3 Armada':'green'}
             )
 
             fig_map.update_layout(
