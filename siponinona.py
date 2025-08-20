@@ -446,11 +446,13 @@ else:
             }
 
             df_koordinat = pd.DataFrame(koordinat_data)
+            df = df.merge(df_koordinat, on="Kecamatan", how="left")
 
             # === Plot ke Peta ===
             fig = px.scatter_mapbox(
                 lat="Latitude",
                 lon="Longitude",
+                Color="Cluster"
                 hover_name="Kecamatan",
                 zoom=9,
                 height=600,
