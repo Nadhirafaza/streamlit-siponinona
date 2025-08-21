@@ -415,6 +415,8 @@ else:
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
            
+            df_clustered['Cluster'] = df_clustered['Cluster'].astype(int)
+            
             # Mapping cluster ke label deskriptif
             cluster_label_map = {
                 1: '1 TPS3R',
@@ -444,7 +446,7 @@ else:
             X_pca = pca.fit_transform(X)
 
             df_pca = pd.DataFrame(data=X_pca, columns=['Dim1', 'Dim2'])
-            df_clustered['Cluster'] = df_clustered['Cluster'].astype(int)  # Pastikan bertipe string
+            df_clustered['Cluster'] = df_clustered['Cluster'].astype(str)  # Pastikan bertipe string
             df_pca['Nama Kecamatan'] = df_clustered['Nama Kecamatan']
 
             # Langkah 4: Mapping label cluster ke label deskriptif
