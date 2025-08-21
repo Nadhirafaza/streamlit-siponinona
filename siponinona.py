@@ -262,7 +262,7 @@ else:
                     2. **Bank Sampah** (Fasilitas daur ulang sampah).  
                     3. **Armada** (Kendaraan angkut sampah menuju TPA).  
 
-                    Baris untuk centroid awal dipilih sesuai rumus agar cluster yang terbentuk lebih mudah dianalisis dan memudahkan rekomendasi alokasi fasilitas pengelolaan sampah.        
+                    Baris untuk nilai centroid awal dipilih sesuai rumus agar cluster yang terbentuk lebih mudah dianalisis dan memudahkan rekomendasi alokasi fasilitas pengelolaan sampah.        
 
                     Dengan konfigurasi ini, setiap wilayah dapat dikelompokkan sesuai kebutuhan utama pengelolaan sampah, sehingga hasil analisis lebih **praktis dan sistematis**.
                     """)
