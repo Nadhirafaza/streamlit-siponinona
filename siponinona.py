@@ -511,7 +511,7 @@ else:
             hover_name="Nama Kecamatan",
             hover_data=["Cluster_Label", "Volume Sampah Tidak Terlayani"],
             color="Cluster_Label",
-            zoom=10,
+            zoom=9,  # zoom awal lebih luas
             height=600,
             category_orders={'Cluster_Label': ['1 TPS3R', '2 Bank Sampah', '3 Armada']},  
             color_discrete_map={'1 TPS3R':'orange','2 Bank Sampah':'blue','3 Armada':'green'},
@@ -520,10 +520,18 @@ else:
 
             fig_map.update_traces(marker=dict(size=10))
 
+        # Update layout untuk kontrol zoom dan center peta
             fig_map.update_layout(
-                mapbox_style="carto-positron",
-                margin={"r":0,"t":0,"l":0,"b":0},
-                legend_title_text='Cluster'
+            mapbox=dict(
+                style="carto-positron",
+                center=dict(lat=-6.6, lon=106.8),  # pusat peta di Kabupaten Bogor
+                zoom=9,  # zoom awal
+                pitch=0,  # tampilan datar
+                bearing=0
+            ),
+            margin={"r":0,"t":0,"l":0,"b":0},
+            legend_title_text='Cluster',
+            hovermode="closest"
             )
 
             st.plotly_chart(fig_map, use_container_width=True)
