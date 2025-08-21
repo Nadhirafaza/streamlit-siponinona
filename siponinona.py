@@ -515,10 +515,10 @@ else:
             height=600,
             category_orders={'Cluster_Label': ['1 TPS3R', '2 Bank Sampah', '3 Armada']},  
             color_discrete_map={'1 TPS3R':'orange','2 Bank Sampah':'blue','3 Armada':'green'},
-            size_max=20
+            size_max=15
             )
 
-            fig_map.update_traces(marker=dict(size=15))
+            fig_map.update_traces(marker=dict(size=10))
 
             fig_map.update_layout(
                 mapbox_style="carto-positron",
