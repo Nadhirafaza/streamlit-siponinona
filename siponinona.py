@@ -101,37 +101,6 @@ def login_user(username, password):
         return result
     return None
 
-# K-Means Manual dengan Iterasi
-def kmeans_manual(X, initial_centroids, max_iter=100, tol=1e-4):
-    centroids = initial_centroids.copy()
-    history = []  # Simpan histori centroid & label
-    
-    for i in range(max_iter):
-        # Hitung jarak tiap titik ke setiap centroid
-        distances = np.linalg.norm(X[:, np.newaxis] - centroids, axis=2)
-        
-        # Assign cluster ke centroid terdekat
-        labels = np.argmin(distances, axis=1)
-        
-        # Simpan histori iterasi
-        history.append({
-            "iterasi": i+1,
-            "centroids": centroids.copy(),
-            "labels": labels.copy()
-        })
-        
-        # Hitung centroid baru
-        new_centroids = np.array([X[labels == k].mean(axis=0) if np.any(labels == k) else centroids[k] 
-                                  for k in range(len(centroids))])
-        
-        # Cek konvergensi
-        if np.all(np.abs(new_centroids - centroids) < tol):
-            break
-        
-        centroids = new_centroids
-    
-    return centroids, labels, history    
-
 # Inisialisasi session state
 if "is_logged_in" not in st.session_state:
     st.session_state.is_logged_in = False
@@ -385,30 +354,39 @@ else:
                 X = df[selected_columns].values
                 initial_centroids = np.array(selected_data)
 
-                # Jalankan KMeans manual
-                final_centroids, final_labels, history = kmeans_manual(X, initial_centroids)
+                kmeans = KMeans(
+                    n_clusters=num_clusters,
+                    init=initial_centroids,
+                    n_init=1
+                )
+                clusters = kmeans.fit_predict(X)
 
-                # Simpan hasil akhir
                 df_clustered = df.copy()
-                df_clustered['Cluster'] = final_labels + 1
+                df_clustered['Cluster'] = clusters + 1
                 st.session_state.df_clustered = df_clustered
 
                 st.success("Clustering berhasil!")
 
-                # --- Hasil Iterasi Terakhir per Data ---
-                st.subheader("📌 Hasil Iterasi Terakhir per Data")
-                iterasi_akhir = pd.DataFrame({
-                    "No": df.index + 1,
-                    "Nama Kecamatan": st.session_state.df["Nama Kecamatan"],
-                    "Cluster Terakhir": df_clustered["Cluster"]
-                })
-                st.dataframe(iterasi_akhir)
+                st.subheader("Hasil Clustering")
+                st.dataframe(df_clustered.sort_values("Cluster"))
 
-                # --- Centroid Akhir ---
-                st.subheader("📊 Nilai Centroid Akhir")
-                st.write(pd.DataFrame(final_centroids, columns=selected_columns))
-                            
+                st.subheader("Nilai Centroid Akhir")
+                st.write(df_clustered.groupby("Cluster")[selected_columns].mean())
+                
                 show_credit()
+                
+                if len(selected_columns) == 2:
+                    st.subheader("Visualisasi Cluster")
+                    fig, ax = plt.subplots(figsize=(10, 6))
+                    ax.scatter(X[:, 0], X[:, 1], c=clusters, cmap='viridis', edgecolor='k', alpha=0.7)
+                    ax.scatter(initial_centroids[:, 0], initial_centroids[:, 1], c='red', s=200, marker='*', label='Centroid Awal', edgecolor='k')
+                    ax.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], c='blue', s=200, marker='X', label='Centroid Akhir', edgecolor='k')
+                    ax.set_xlabel(selected_columns[0])
+                    ax.set_ylabel(selected_columns[1])
+                    ax.set_title("Visualisasi K-Means Clustering")
+                    ax.legend()
+                    ax.grid(True)
+                    st.pyplot(fig)
 
         except Exception as e:
             st.error(f"Terjadi error: {str(e)}")
