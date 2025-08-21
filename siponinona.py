@@ -495,26 +495,49 @@ else:
             coords_df = pd.read_excel("data_koordinat.xlsx")  # Nama Kecamatan, Latitude, Longitude
             df_map = pd.merge(df_clustered, coords_df, on='Nama Kecamatan', how='left')
 
-            cluster_colors = {"1 TPS3R": "orange", "2 Bank Sampah": "blue", "3 Armada": "green"}
+            # Mapping cluster ke label deskriptif
+            cluster_label_map = {
+                1: '1 TPS3R',
+                2: '2 Bank Sampah',
+                3: '3 Armada'
+            }
+
+            # Buat kolom Cluster_Label di df_map
+            df_map['Cluster_Label'] = df_map['Cluster'].map(cluster_label_map)
+
             m = folium.Map(location=[-6.6, 106.8], zoom_start=10)
 
+            # Warna untuk tiap cluster
+            cluster_colors = {
+                '1 TPS3R': 'orange',
+                '2 Bank Sampah': 'blue',
+                '3 Armada': 'green'
+            }
+
+            # Loop setiap baris
             for _, row in df_map.iterrows():
-                if pd.notna(row["Latitude"]) and pd.notna(row["Longitude"]):
+                lat = row.get("Latitude")
+                lng = row.get("Longitude")
+                cluster_label = row.get("Cluster_Label")
+                
+                # Pastikan koordinat dan cluster tidak kosong
+                if pd.notna(lat) and pd.notna(lng) and pd.notna(cluster_label):
                     popup_text = (
                         f"<b>{row['Nama Kecamatan']}</b><br>"
-                        f"Cluster: {row['Cluster_Label']}<br>"
+                        f"Cluster: {cluster_label}<br>"
                         f"Volume Sampah Tidak Terlayani: {row['Volume Sampah Tidak Terlayani']}<br>"
                         f"Jarak ke TPA: {row['Jarak ke TPA']}<br>"
                         f"Jumlah Desa: {row['Jumlah Desa']}<br>"
                         f"Jumlah Penduduk: {row['Jumlah Penduduk']}"
                     )
+                    
                     folium.CircleMarker(
-                        location=[row["Latitude"], row["Longitude"]],
+                        location=[lat, lng],
                         radius=6,
                         color="white",
                         weight=1,
                         fill=True,
-                        fill_color=cluster_colors.get(row["Cluster_Label"], "gray"),
+                        fill_color=cluster_colors.get(cluster_label, "gray"),
                         fill_opacity=0.85,
                         popup=popup_text
                     ).add_to(m)
