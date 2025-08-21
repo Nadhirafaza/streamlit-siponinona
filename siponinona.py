@@ -496,6 +496,7 @@ else:
             df_map = pd.merge(df_clustered, coords_df, on='Nama Kecamatan', how='left')
 
             # Pastikan df_map memiliki kolom yang benar
+            df_map['Cluster'] = df_map['Cluster'].astype(int)
             df_map['Cluster_Label'] = df_map['Cluster'].map({
                 1: '1 TPS3R',
                 2: '2 Bank Sampah',
@@ -509,42 +510,29 @@ else:
                 # Buat peta
                 m = folium.Map(location=[-6.6, 106.8], zoom_start=10)
 
-                # Warna & simbol sesuai scatter plot
                 cluster_colors = {
                     '1 TPS3R': 'orange',
                     '2 Bank Sampah': 'blue',
                     '3 Armada': 'green'
                 }
-                
-                cluster_icons = {
-                    '1 TPS3R': 'circle',
-                    '2 Bank Sampah': 'square',
-                    '3 Armada': 'star'
-                }
 
                 for _, row in df_map.iterrows():
-                    lat = row['Latitude']
-                    lng = row['Longitude']
+                    lat, lng = row['Latitude'], row['Longitude']
                     cluster_label = row['Cluster_Label']
-
+                    
                     if pd.notna(lat) and pd.notna(lng) and pd.notna(cluster_label):
-                        popup_text = (
-                            f"<b>{row['Nama Kecamatan']}</b><br>"
-                            f"Cluster: {cluster_label}<br>"
-                            f"Volume Sampah Tidak Terlayani: {row['Volume Sampah Tidak Terlayani']}<br>"
-                            f"Jarak ke TPA: {row['Jarak ke TPA']}<br>"
-                            f"Jumlah Desa: {row['Jumlah Desa']}<br>"
-                            f"Jumlah Penduduk: {row['Jumlah Penduduk']}"
-                        )
-
-                        # Gunakan folium.Marker agar simbol berbeda terlihat
-                        folium.Marker(
+                        folium.CircleMarker(
                             location=[lat, lng],
-                            popup=popup_text,
-                            icon=folium.Icon(color=cluster_colors.get(cluster_label, 'gray'), icon='info-sign')
+                            radius=8,
+                            color=cluster_colors[cluster_label],
+                            fill=True,
+                            fill_color=cluster_colors[cluster_label],
+                            fill_opacity=0.7,
+                            popup=f"{row['Nama Kecamatan']}<br>Cluster: {cluster_label}"
                         ).add_to(m)
 
                 st_folium(m, width=900, height=520)
+
 
 
             # Catatan interpretasi tiap cluster
