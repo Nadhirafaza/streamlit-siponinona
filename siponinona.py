@@ -12,6 +12,8 @@ from io import BytesIO
 import seaborn as sns
 import plotly.express as px
 from scipy.spatial.distance import cdist
+import folium
+from streamlit_folium import st_folium
 
 # Konfigurasi halaman
 st.set_page_config(
@@ -490,51 +492,34 @@ else:
             st.plotly_chart(fig, use_container_width=True)
 
             # Baca file koordinat dari folder proyek
-            coords_df = pd.read_excel("data_koordinat.xlsx")  # pastikan ada kolom Nama Kecamatan, Latitude, Longitude
+            coords_df = pd.read_excel("data_koordinat.xlsx")  # Nama Kecamatan, Latitude, Longitude
             df_map = pd.merge(df_clustered, coords_df, on='Nama Kecamatan', how='left')
 
-            df_map['Cluster'] = df_map['Cluster'].astype(int)
+            cluster_colors = {"1 TPS3R": "orange", "2 Bank Sampah": "blue", "3 Armada": "green"}
+            m = folium.Map(location=[-6.6, 106.8], zoom_start=10)
 
-            # Buat kolom Cluster_Label berdasarkan mapping
-            cluster_label_map = {
-            1: '1 TPS3R',
-            2: '2 Bank Sampah',
-            3: '3 Armada'
-            }
-            
-            df_map['Cluster_Label'] = df_map['Cluster'].map(cluster_label_map)
-            
-            fig_map = px.scatter_mapbox(
-            df_map,
-            lat="Latitude",
-            lon="Longitude",
-            hover_name="Nama Kecamatan",
-            hover_data=["Cluster_Label", "Volume Sampah Tidak Terlayani"],
-            color="Cluster_Label",
-            zoom=9,  # zoom awal lebih luas
-            height=600,
-            category_orders={'Cluster_Label': ['1 TPS3R', '2 Bank Sampah', '3 Armada']},  
-            color_discrete_map={'1 TPS3R':'orange','2 Bank Sampah':'blue','3 Armada':'green'},
-            size_max=15
-            )
+            for _, row in df_map.iterrows():
+                if pd.notna(row["Latitude"]) and pd.notna(row["Longitude"]):
+                    popup_text = (
+                        f"<b>{row['Nama Kecamatan']}</b><br>"
+                        f"Cluster: {row['Cluster_Label']}<br>"
+                        f"Volume Sampah Tidak Terlayani: {row['Volume Sampah Tidak Terlayani']}<br>"
+                        f"Jarak ke TPA: {row['Jarak ke TPA']}<br>"
+                        f"Jumlah Desa: {row['Jumlah Desa']}<br>"
+                        f"Jumlah Penduduk: {row['Jumlah Penduduk']}"
+                    )
+                    folium.CircleMarker(
+                        location=[row["Latitude"], row["Longitude"]],
+                        radius=6,
+                        color="white",
+                        weight=1,
+                        fill=True,
+                        fill_color=cluster_colors.get(row["Cluster_Label"], "gray"),
+                        fill_opacity=0.85,
+                        popup=popup_text
+                    ).add_to(m)
 
-            fig_map.update_traces(marker=dict(size=10))
-
-        # Update layout untuk kontrol zoom dan center peta
-            fig_map.update_layout(
-            mapbox=dict(
-                style="carto-positron",
-                center=dict(lat=-6.6, lon=106.8),  # pusat peta di Kabupaten Bogor
-                zoom=10,  # zoom awal
-                pitch=0,  # tampilan datar
-                bearing=0
-            ),
-            margin={"r":0,"t":0,"l":0,"b":0},
-            legend_title_text='Cluster',
-            hovermode="closest"
-            )
-
-            st.plotly_chart(fig_map, use_container_width=True)
+            st_folium(m, width=900, height=520)
 
             # Catatan interpretasi tiap cluster
             st.markdown("### 📌 Catatan Interpretasi Cluster")
