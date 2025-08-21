@@ -422,27 +422,21 @@ else:
                 3: '3 Armada'
             }
 
-            # Hitung jumlah tiap cluster
+           # Diagram Pie: Persentase tiap cluster
             cluster_counts = df_clustered['Cluster'].value_counts().sort_index()
-
-            # Buat Pie Chart
             fig_pie = px.pie(
-                names=[cluster_label_map[c] for c in cluster_counts.index],  # map int ke label
+                names=cluster_counts.index.map(cluster_label_map),
                 values=cluster_counts.values,
                 title="Persentase Tiap Cluster",
                 hole=0.4,
-                color=[cluster_label_map[c] for c in cluster_counts.index],
+                color=cluster_counts.index.map(cluster_label_map),
                 color_discrete_map={
                     '1 TPS3R': 'orange',
                     '2 Bank Sampah': 'blue',
                     '3 Armada': 'green'
                 }
             )
-
-            # Supaya persentase tampil di dalam pie
             fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-
-            # Tampilkan plot
             st.plotly_chart(fig_pie, use_container_width=True)
                 
             # PCA dan visualisasi interaktif
@@ -450,7 +444,7 @@ else:
             X_pca = pca.fit_transform(X)
 
             df_pca = pd.DataFrame(data=X_pca, columns=['Dim1', 'Dim2'])
-            df_clustered['Cluster'] = df_clustered['Cluster'].astype(str)  # Pastikan bertipe string
+            df_clustered['Cluster'] = df_clustered['Cluster'].astype(int)  # Pastikan bertipe string
             df_pca['Nama Kecamatan'] = df_clustered['Nama Kecamatan']
 
             # Langkah 4: Mapping label cluster ke label deskriptif
