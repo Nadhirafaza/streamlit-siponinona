@@ -249,6 +249,7 @@ else:
                     st.markdown("""
                     ###   💡 Penjelasan
                     Pada tahap **Konfigurasi Clustering**, pengguna diminta untuk memilih variabel yang relevan agar hasil pengelompokan sesuai dengan kondisi lapangan.  
+                    
                     Variabel yang dipilih yaitu:  
 
                     - **Volume Sampah Tidak Terlayani** → menunjukkan besarnya permasalahan sampah yang belum tertangani.  
@@ -256,12 +257,14 @@ else:
                     - **Jumlah Desa** → mencerminkan luas serta kompleksitas wilayah yang dilayani.  
                     - **Jumlah Penduduk** → semakin banyak penduduk, semakin tinggi potensi timbulan sampah.  
 
-                    Sementara itu, jumlah cluster ditentukan **k = 3** karena penelitian ini diarahkan pada **3 jenis rekomendasi alokasi fasilitas pengelolaan sampah**:
+                    Jumlah cluster ditentukan **k = 3** karena penelitian ini diarahkan pada **3 jenis rekomendasi alokasi fasilitas pengelolaan sampah**:
                     1. **TPS3R** (Tempat pengolahan sampah Reduce-Reuse-Recycle).  
                     2. **Bank Sampah** (Fasilitas daur ulang sampah).  
                     3. **Armada** (Kendaraan angkut sampah menuju TPA).  
 
-                    Dengan konfigurasi ini, setiap wilayah dapat dikelompokkan sesuai kebutuhan utama pengelolaan sampah, sehingga hasil analisis lebih **praktis, sistematis, dan dapat langsung menjadi dasar kebijakan**.
+                    Baris untuk centroid awal dipilih sesuai rumus agar cluster yang terbentuk lebih mudah dianalisis dan memudahkan rekomendasi alokasi fasilitas pengelolaan sampah.        
+
+                    Dengan konfigurasi ini, setiap wilayah dapat dikelompokkan sesuai kebutuhan utama pengelolaan sampah, sehingga hasil analisis lebih **praktis dan sistematis**.
                     """)
 
                     cols1, cols2 = st.columns(2)
