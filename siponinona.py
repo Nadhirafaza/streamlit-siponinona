@@ -495,56 +495,57 @@ else:
             coords_df = pd.read_excel("data_koordinat.xlsx")  # Nama Kecamatan, Latitude, Longitude
             df_map = pd.merge(df_clustered, coords_df, on='Nama Kecamatan', how='left')
 
-            # Mapping cluster ke label deskriptif
-            cluster_label_map = {
+            # Pastikan df_map memiliki kolom yang benar
+            df_map['Cluster_Label'] = df_map['Cluster'].map({
                 1: '1 TPS3R',
                 2: '2 Bank Sampah',
                 3: '3 Armada'
-            }
+            })
 
-            cluster_colors = {
-                '1 TPS3R': 'orange',
-                '2 Bank Sampah': 'blue',
-                '3 Armada': 'green'
-            }
+            # Cek apakah Latitude & Longitude ada
+            if 'Latitude' not in df_map.columns or 'Longitude' not in df_map.columns:
+                st.error("Kolom Latitude dan Longitude tidak ditemukan di data koordinat!")
+            else:
+                # Buat peta
+                m = folium.Map(location=[-6.6, 106.8], zoom_start=10)
 
-            cluster_icons = {
-                '1 TPS3R': 'circle',
-                '2 Bank Sampah': 'square',
-                '3 Armada': 'star'
-            }
+                # Warna & simbol sesuai scatter plot
+                cluster_colors = {
+                    '1 TPS3R': 'orange',
+                    '2 Bank Sampah': 'blue',
+                    '3 Armada': 'green'
+                }
+                
+                cluster_icons = {
+                    '1 TPS3R': 'circle',
+                    '2 Bank Sampah': 'square',
+                    '3 Armada': 'star'
+                }
 
-            # Buat kolom Cluster_Label di df_map
-            df_map['Cluster_Label'] = df_map['Cluster'].map(cluster_label_map)
+                for _, row in df_map.iterrows():
+                    lat = row['Latitude']
+                    lng = row['Longitude']
+                    cluster_label = row['Cluster_Label']
 
-            # Buat peta
-            m = folium.Map(location=[-6.6, 106.8], zoom_start=10)
+                    if pd.notna(lat) and pd.notna(lng) and pd.notna(cluster_label):
+                        popup_text = (
+                            f"<b>{row['Nama Kecamatan']}</b><br>"
+                            f"Cluster: {cluster_label}<br>"
+                            f"Volume Sampah Tidak Terlayani: {row['Volume Sampah Tidak Terlayani']}<br>"
+                            f"Jarak ke TPA: {row['Jarak ke TPA']}<br>"
+                            f"Jumlah Desa: {row['Jumlah Desa']}<br>"
+                            f"Jumlah Penduduk: {row['Jumlah Penduduk']}"
+                        )
 
-            # Tambahkan marker sesuai warna & simbol
-            for _, row in df_map.iterrows():
-                lat = row.get("Latitude")
-                lng = row.get("Longitude")
-                cluster_label = row.get("Cluster_Label")
+                        # Gunakan folium.Marker agar simbol berbeda terlihat
+                        folium.Marker(
+                            location=[lat, lng],
+                            popup=popup_text,
+                            icon=folium.Icon(color=cluster_colors.get(cluster_label, 'gray'), icon='info-sign')
+                        ).add_to(m)
 
-                if pd.notna(lat) and pd.notna(lng) and pd.notna(cluster_label):
-                    popup_text = (
-                        f"<b>{row['Nama Kecamatan']}</b><br>"
-                        f"Cluster: {cluster_label}<br>"
-                        f"Volume Sampah Tidak Terlayani: {row['Volume Sampah Tidak Terlayani']}<br>"
-                        f"Jarak ke TPA: {row['Jarak ke TPA']}<br>"
-                        f"Jumlah Desa: {row['Jumlah Desa']}<br>"
-                        f"Jumlah Penduduk: {row['Jumlah Penduduk']}"
-                    )
+                st_folium(m, width=900, height=520)
 
-                    # Gunakan ikon berbeda untuk tiap cluster
-                    icon_type = cluster_icons.get(cluster_label, 'info-sign')
-                    folium.Marker(
-                        location=[lat, lng],
-                        popup=popup_text,
-                        icon=folium.Icon(color=cluster_colors.get(cluster_label, 'gray'), icon=icon_type)
-                    ).add_to(m)
-
-            st_folium(m, width=900, height=520)
 
             # Catatan interpretasi tiap cluster
             st.markdown("### 📌 Catatan Interpretasi Cluster")
