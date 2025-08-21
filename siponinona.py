@@ -422,21 +422,27 @@ else:
                 3: '3 Armada'
             }
 
-           # Diagram Pie: Persentase tiap cluster
+            # Hitung jumlah tiap cluster
             cluster_counts = df_clustered['Cluster'].value_counts().sort_index()
+
+            # Buat Pie Chart
             fig_pie = px.pie(
-                names=cluster_counts.index.map(cluster_label_map),
+                names=[cluster_label_map[c] for c in cluster_counts.index],  # map int ke label
                 values=cluster_counts.values,
                 title="Persentase Tiap Cluster",
                 hole=0.4,
-                color=cluster_counts.index.map(cluster_label_map),
+                color=[cluster_label_map[c] for c in cluster_counts.index],
                 color_discrete_map={
                     '1 TPS3R': 'orange',
                     '2 Bank Sampah': 'blue',
                     '3 Armada': 'green'
                 }
             )
+
+            # Supaya persentase tampil di dalam pie
             fig_pie.update_traces(textposition='inside', textinfo='percent+label')
+
+            # Tampilkan plot
             st.plotly_chart(fig_pie, use_container_width=True)
                 
             # PCA dan visualisasi interaktif
