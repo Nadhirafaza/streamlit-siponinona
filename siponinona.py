@@ -493,26 +493,28 @@ else:
             coords_df = pd.read_excel("data_koordinat.xlsx")  # pastikan ada kolom Nama Kecamatan, Latitude, Longitude
             df_map = pd.merge(df_clustered, coords_df, on='Nama Kecamatan', how='left')
 
-            df_map['Cluster'] = df_map['Cluster'].astype(str)
+            df_map['Cluster'] = df_map['Cluster'].astype(int)
 
             # Buat kolom Cluster_Label berdasarkan mapping
             cluster_label_map = {
-                '1': '1 TPS3R',
-                '2': '2 Bank Sampah',
-                '3': '3 Armada'
+            1: '1 TPS3R',
+            2: '2 Bank Sampah',
+            3: '3 Armada'
             }
+            
             df_map['Cluster_Label'] = df_map['Cluster'].map(cluster_label_map)
             
             fig_map = px.scatter_mapbox(
-                df_map,
-                lat="Latitude",
-                lon="Longitude",
-                hover_name="Nama Kecamatan",
-                hover_data=["Cluster_Label", "Volume Sampah Tidak Terlayani"],
-                color="Cluster_Label",
-                zoom=10,
-                height=600,
-                color_discrete_map={'1 TPS3R':'orange','2 Bank Sampah':'blue','3 Armada':'green'}
+            df_map,
+            lat="Latitude",
+            lon="Longitude",
+            hover_name="Nama Kecamatan",
+            hover_data=["Cluster_Label", "Volume Sampah Tidak Terlayani"],
+            color="Cluster_Label",
+            zoom=10,
+            height=600,
+            category_orders={'Cluster_Label': ['1 TPS3R', '2 Bank Sampah', '3 Armada']},  # urut sesuai keinginan
+            color_discrete_map={'1 TPS3R':'orange','2 Bank Sampah':'blue','3 Armada':'green'}
             )
 
             fig_map.update_layout(
