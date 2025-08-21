@@ -345,24 +345,31 @@ else:
             
         try:
             if st.button("🚀 Jalankan Clustering"):
-                df = st.session_state.df_normalized
+                df = st.session_state.df_normalized.copy()
                 selected_columns = st.session_state.selected_columns
                 selected_data = st.session_state.selected_data
                 num_clusters = st.session_state.num_clusters
 
-                # Konversi ke array
-                X = df[selected_columns].values
-                initial_centroids = np.array(selected_data)
+                # 🔹 Hanya ambil kolom numerik saja
+                numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+                selected_columns = [col for col in selected_columns if col in numeric_cols]
 
-                # Simulasi manual iterasi K-Means
+                # 🔹 Konversi ke float
+                X = df[selected_columns].astype(float).values
+                initial_centroids = np.array(selected_data, dtype=float)
+
+                # ============== SIMULASI MANUAL K-MEANS UNTUK ITERASI TERAKHIR ==============
                 centroids = initial_centroids.copy()
                 for it in range(100):  # max 100 iterasi
-                    # Hitung jarak tiap data ke centroid
+                    # Hitung jarak ke centroid
                     distances = cdist(X, centroids, metric='euclidean')
                     labels = np.argmin(distances, axis=1)
 
                     # Update centroid
-                    new_centroids = np.array([X[labels == k].mean(axis=0) if len(X[labels == k]) > 0 else centroids[k] for k in range(num_clusters)])
+                    new_centroids = np.array([
+                        X[labels == k].mean(axis=0) if len(X[labels == k]) > 0 else centroids[k] 
+                        for k in range(num_clusters)
+                    ])
 
                     # Cek konvergen
                     if np.allclose(centroids, new_centroids):
@@ -373,11 +380,12 @@ else:
                 df_iter_last = df.copy()
                 df_iter_last['Cluster (Iterasi Akhir)'] = labels + 1
 
-                # Simpan hasil final juga ke sklearn KMeans agar konsisten
+                # ============== HASIL FINAL DENGAN SKLEARN (KONSISTEN) ==============
                 kmeans = KMeans(
                     n_clusters=num_clusters,
                     init=initial_centroids,
-                    n_init=1
+                    n_init=1,
+                    random_state=42
                 )
                 clusters = kmeans.fit_predict(X)
 
@@ -385,6 +393,7 @@ else:
                 df_clustered['Cluster'] = clusters + 1
                 st.session_state.df_clustered = df_clustered
 
+                # ============== OUTPUT ==============
                 st.success("Clustering berhasil!")
 
                 st.subheader("📍 Hasil Iterasi Terakhir (sebelum centroid akhir)")
@@ -398,12 +407,15 @@ else:
                 
                 show_credit()
                 
+                # Visualisasi jika 2 dimensi
                 if len(selected_columns) == 2:
                     st.subheader("Visualisasi Cluster")
                     fig, ax = plt.subplots(figsize=(10, 6))
                     ax.scatter(X[:, 0], X[:, 1], c=clusters, cmap='viridis', edgecolor='k', alpha=0.7)
-                    ax.scatter(initial_centroids[:, 0], initial_centroids[:, 1], c='red', s=200, marker='*', label='Centroid Awal', edgecolor='k')
-                    ax.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], c='blue', s=200, marker='X', label='Centroid Akhir', edgecolor='k')
+                    ax.scatter(initial_centroids[:, 0], initial_centroids[:, 1], 
+                            c='red', s=200, marker='*', label='Centroid Awal', edgecolor='k')
+                    ax.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], 
+                            c='blue', s=200, marker='X', label='Centroid Akhir', edgecolor='k')
                     ax.set_xlabel(selected_columns[0])
                     ax.set_ylabel(selected_columns[1])
                     ax.set_title("Visualisasi K-Means Clustering")
