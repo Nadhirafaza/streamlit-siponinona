@@ -528,7 +528,14 @@ else:
                             fill=True,
                             fill_color=cluster_colors[cluster_label],
                             fill_opacity=0.7,
-                            popup=f"{row['Nama Kecamatan']}<br>Cluster: {cluster_label}"
+                            popup=(
+                                f"<b>{row['Nama Kecamatan']}</b><br>"
+                                f"Cluster: {cluster_label}<br>"
+                                f"Volume Sampah Tidak Terlayani: {row['Volume Sampah Tidak Terlayani']}<br>"
+                                f"Jarak ke TPA: {row['Jarak ke TPA']} km<br>"
+                                f"Jumlah Desa: {row['Jumlah Desa']}<br>"
+                                f"Jumlah Penduduk: {row['Jumlah Penduduk']}"
+                            )
                         ).add_to(m)
 
                 st_folium(m, width=900, height=520)
