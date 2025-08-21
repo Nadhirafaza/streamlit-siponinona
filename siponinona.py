@@ -525,7 +525,7 @@ else:
             mapbox=dict(
                 style="carto-positron",
                 center=dict(lat=-6.6, lon=106.8),  # pusat peta di Kabupaten Bogor
-                zoom=13,  # zoom awal
+                zoom=10,  # zoom awal
                 pitch=0,  # tampilan datar
                 bearing=0
             ),
