@@ -502,25 +502,30 @@ else:
                 3: '3 Armada'
             }
 
-            # Buat kolom Cluster_Label di df_map
-            df_map['Cluster_Label'] = df_map['Cluster'].map(cluster_label_map)
-
-            m = folium.Map(location=[-6.6, 106.8], zoom_start=10)
-
-            # Warna untuk tiap cluster
             cluster_colors = {
                 '1 TPS3R': 'orange',
                 '2 Bank Sampah': 'blue',
                 '3 Armada': 'green'
             }
 
-            # Loop setiap baris
+            cluster_icons = {
+                '1 TPS3R': 'circle',
+                '2 Bank Sampah': 'square',
+                '3 Armada': 'star'
+            }
+
+            # Buat kolom Cluster_Label di df_map
+            df_map['Cluster_Label'] = df_map['Cluster'].map(cluster_label_map)
+
+            # Buat peta
+            m = folium.Map(location=[-6.6, 106.8], zoom_start=10)
+
+            # Tambahkan marker sesuai warna & simbol
             for _, row in df_map.iterrows():
                 lat = row.get("Latitude")
                 lng = row.get("Longitude")
                 cluster_label = row.get("Cluster_Label")
-                
-                # Pastikan koordinat dan cluster tidak kosong
+
                 if pd.notna(lat) and pd.notna(lng) and pd.notna(cluster_label):
                     popup_text = (
                         f"<b>{row['Nama Kecamatan']}</b><br>"
@@ -530,16 +535,13 @@ else:
                         f"Jumlah Desa: {row['Jumlah Desa']}<br>"
                         f"Jumlah Penduduk: {row['Jumlah Penduduk']}"
                     )
-                    
-                    folium.CircleMarker(
+
+                    # Gunakan ikon berbeda untuk tiap cluster
+                    icon_type = cluster_icons.get(cluster_label, 'info-sign')
+                    folium.Marker(
                         location=[lat, lng],
-                        radius=6,
-                        color="white",
-                        weight=1,
-                        fill=True,
-                        fill_color=cluster_colors.get(cluster_label, "gray"),
-                        fill_opacity=0.85,
-                        popup=popup_text
+                        popup=popup_text,
+                        icon=folium.Icon(color=cluster_colors.get(cluster_label, 'gray'), icon=icon_type)
                     ).add_to(m)
 
             st_folium(m, width=900, height=520)
