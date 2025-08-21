@@ -354,6 +354,26 @@ else:
                 X = df[selected_columns].values
                 initial_centroids = np.array(selected_data)
 
+                # Simulasi manual iterasi K-Means
+                centroids = initial_centroids.copy()
+                for it in range(100):  # max 100 iterasi
+                    # Hitung jarak tiap data ke centroid
+                    distances = cdist(X, centroids, metric='euclidean')
+                    labels = np.argmin(distances, axis=1)
+
+                    # Update centroid
+                    new_centroids = np.array([X[labels == k].mean(axis=0) if len(X[labels == k]) > 0 else centroids[k] for k in range(num_clusters)])
+
+                    # Cek konvergen
+                    if np.allclose(centroids, new_centroids):
+                        break
+                    centroids = new_centroids
+
+                # Data hasil iterasi terakhir
+                df_iter_last = df.copy()
+                df_iter_last['Cluster (Iterasi Akhir)'] = labels + 1
+
+                # Simpan hasil final juga ke sklearn KMeans agar konsisten
                 kmeans = KMeans(
                     n_clusters=num_clusters,
                     init=initial_centroids,
@@ -367,10 +387,13 @@ else:
 
                 st.success("Clustering berhasil!")
 
-                st.subheader("Hasil Clustering")
+                st.subheader("📍 Hasil Iterasi Terakhir (sebelum centroid akhir)")
+                st.dataframe(df_iter_last.sort_values("Cluster (Iterasi Akhir)"))
+
+                st.subheader("📍 Hasil Clustering Final (sklearn)")
                 st.dataframe(df_clustered.sort_values("Cluster"))
 
-                st.subheader("Nilai Centroid Akhir")
+                st.subheader("📍 Nilai Centroid Akhir")
                 st.write(df_clustered.groupby("Cluster")[selected_columns].mean())
                 
                 show_credit()
