@@ -502,13 +502,7 @@ else:
             3: '3 Armada'
             }
             
-            symbol_map = {
-            '1 TPS3R': 'circle',
-            '2 Bank Sampah': 'square',
-            '3 Armada': 'diamond'
-            }
-
-            df_map['Cluster'] = df_map['Cluster_Label'].map(symbol_map)
+            df_map['Cluster_Label'] = df_map['Cluster'].map(cluster_label_map)
             
             fig_map = px.scatter_mapbox(
             df_map,
@@ -519,13 +513,8 @@ else:
             color="Cluster_Label",
             zoom=10,
             height=600,
-            category_orders={'Cluster_Label': ['1 TPS3R', '2 Bank Sampah', '3 Armada']},
-            color_discrete_map={'1 TPS3R':'orange','2 Bank Sampah':'blue','3 Armada':'green'},
-            symbol_map={
-                    '1 TPS3R': 'circle',
-                    '2 Bank Sampah': 'square',
-                    '3 Armada': 'diamond'
-                }
+            category_orders={'Cluster_Label': ['1 TPS3R', '2 Bank Sampah', '3 Armada']},  # urut sesuai keinginan
+            color_discrete_map={'1 TPS3R':'orange','2 Bank Sampah':'blue','3 Armada':'green'}
             )
 
             fig_map.update_layout(
