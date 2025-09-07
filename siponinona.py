@@ -27,9 +27,9 @@ def get_connection():
     try:
         connection = mysql.connector.connect(
             host="sql12.freesqldatabase.com",     
-            user="sql12795318",                 
-            password="1fVUMDJ15n",           
-            database="sql12795318",             
+            user="sql12797629",                 
+            password="bFKku3asL2",           
+            database="sql12797629",             
             port=3306
         )
         return connection
@@ -631,6 +631,7 @@ else:
 
         else:
             st.warning("⚠️ Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan.")
+
 
 
 
