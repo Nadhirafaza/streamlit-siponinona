@@ -27,9 +27,9 @@ def get_connection():
     try:
         connection = mysql.connector.connect(
             host="sql12.freesqldatabase.com",     
-            user="sql12797629",                 
-            password="bFKku3asL2",           
-            database="sql12797629",             
+            user="sql12799945",                 
+            password="xqD3sPKpCQ",           
+            database="sql12799945",             
             port=3306
         )
         return connection
@@ -363,8 +363,16 @@ else:
 
                 df_clustered = df.copy()
                 df_clustered['Cluster'] = clusters + 1
-                st.session_state.df_clustered = df_clustered
 
+                # Tambahkan kolom keterangan
+                cluster_map = {
+                    1: "TPS3R",
+                    2: "Bank Sampah",
+                    3: "Armada"
+                }
+                df_clustered['Keterangan'] = df_clustered['Cluster'].map(cluster_map)
+
+                st.session_state.df_clustered = df_clustered
                 st.success("Clustering berhasil!")
 
                 st.subheader("Hasil Clustering")
@@ -606,7 +614,7 @@ else:
 
             # Simpan ke dataframe
             df_clustered['S(i)'] = silhouette_values
-            st.dataframe(df_clustered)
+            st.dataframe(df_clustered.sort_values("Cluster"))
 
             # === Plot grafik silhouette per titik ===
             fig, ax = plt.subplots()
@@ -631,8 +639,6 @@ else:
 
         else:
             st.warning("⚠️ Silakan lakukan clustering terlebih dahulu di menu Hasil Perhitungan.")
-
-
 
 
 
